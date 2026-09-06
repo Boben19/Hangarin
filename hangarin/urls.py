@@ -1,8 +1,8 @@
 from django.contrib import admin
 from django.urls import path
-from django.views.generic import RedirectView
+from django.views.generic import TemplateView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', RedirectView.as_view(url='admin/', permanent=False)),
+    path('', TemplateView.as_view(template_name='todo/home.html'), name='home'),
 ]

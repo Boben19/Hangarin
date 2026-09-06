@@ -1,0 +1,51 @@
+:root {
+    --primary: #1b4332;
+    --secondary: #40916c;
+    --accent: #2d6a4f;
+    --primary-fg: #fff;
+
+    --header-color: #f5faf7;
+    --header-branding-color: #fff;
+    --header-bg: #1b4332;
+    --header-link-color: #f5faf7;
+
+    --breadcrumbs-fg: #d8f3dc;
+    --breadcrumbs-link-fg: #fff;
+    --breadcrumbs-bg: #2d6a4f;
+
+    --link-fg: #2d6a4f;
+    --link-hover-color: #1b4332;
+    --link-selected-fg: #1b4332;
+
+    --button-bg: #40916c;
+    --button-fg: #fff;
+    --button-hover-bg: #2d6a4f;
+    --default-button-bg: #1b4332;
+    --default-button-hover-bg: #143728;
+
+    --object-tools-bg: #40916c;
+    --object-tools-hover-bg: #2d6a4f;
+}
+
+#branding h1 {
+    font-weight: 600;
+}
+
+div.breadcrumbs a {
+    color: #fff;
+}
+
+.module h2, .module caption, .inline-group h2 {
+    background: var(--primary);
+}
+
+.selector-chosen h2 {
+    background: var(--accent);
+}
+
+#footer-credit {
+    text-align: center;
+    padding: 14px 0 6px;
+    color: #5a6b63;
+    font-size: 0.85rem;
+}

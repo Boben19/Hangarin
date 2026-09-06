@@ -1,0 +1,58 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hangarin | Task &amp; To-Do Manager</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <header class="site-header">
+        <div class="wrap">
+            <span class="brand">Hangarin</span>
+            <a class="btn btn-outline" href="{% url 'admin:index' %}">Admin Login</a>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="wrap">
+                <h1>Get on top of your day, one task at a time.</h1>
+                <p class="lead">
+                    Hangarin keeps your tasks, deadlines, priorities, and notes
+                    in one place, so nothing important slips through.
+                </p>
+                <a class="btn btn-primary" href="{% url 'admin:index' %}">Go to Dashboard</a>
+            </div>
+        </section>
+
+        <section class="features">
+            <div class="wrap grid">
+                <div class="card">
+                    <h3>Tasks</h3>
+                    <p>Set deadlines, track status, and tie every task to a category and priority.</p>
+                </div>
+                <div class="card">
+                    <h3>Subtasks</h3>
+                    <p>Break big goals into smaller, manageable steps you can actually finish.</p>
+                </div>
+                <div class="card">
+                    <h3>Notes</h3>
+                    <p>Attach context, reminders, or updates directly to the task they belong to.</p>
+                </div>
+                <div class="card">
+                    <h3>Priorities &amp; Categories</h3>
+                    <p>Sort work by urgency and area of your life, so you always know what's next.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="wrap">
+            <p>&copy; {% now "Y" %} Hangarin. Created by Jhon Grover Longsud.</p>
+        </div>
+    </footer>
+</body>
+</html>

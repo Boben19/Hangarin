@@ -1,0 +1,12 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block extrastyle %}
+    {{ block.super }}
+    <link rel="stylesheet" href="{% static 'admin/css/custom_admin.css' %}">
+{% endblock %}
+
+{% block footer %}
+    {{ block.super }}
+    <div id="footer-credit">Hangarin &mdash; created by Jhon Grover Longsud</div>
+{% endblock %}

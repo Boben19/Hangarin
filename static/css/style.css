@@ -1,0 +1,164 @@
+:root {
+    --green-dark: #1b4332;
+    --green-mid: #2d6a4f;
+    --green: #40916c;
+    --green-light: #74c69d;
+    --green-pale: #d8f3dc;
+    --ink: #1b2a23;
+    --muted: #5a6b63;
+    --bg: #f5faf7;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+}
+
+.wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+/* Header */
+
+.site-header {
+    background: var(--green-dark);
+}
+
+.site-header .wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 18px;
+    padding-bottom: 18px;
+}
+
+.brand {
+    color: #fff;
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+/* Buttons */
+
+.btn {
+    display: inline-block;
+    padding: 10px 22px;
+    border-radius: 6px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.btn-primary {
+    background: var(--green);
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background: var(--green-mid);
+}
+
+.btn-outline {
+    background: transparent;
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+.btn-outline:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+/* Hero */
+
+.hero {
+    background: linear-gradient(135deg, var(--green-dark), var(--green-mid));
+    color: #fff;
+    padding: 90px 0 100px;
+}
+
+.hero h1 {
+    font-size: 2.5rem;
+    line-height: 1.2;
+    margin: 0 0 18px;
+    max-width: 640px;
+}
+
+.hero .lead {
+    font-size: 1.15rem;
+    color: var(--green-pale);
+    max-width: 560px;
+    margin: 0 0 32px;
+}
+
+/* Features */
+
+.features {
+    padding: 70px 0;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 22px;
+}
+
+@media (max-width: 860px) {
+    .grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 540px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.card {
+    background: #fff;
+    border: 1px solid #e2ede7;
+    border-top: 3px solid var(--green);
+    border-radius: 10px;
+    padding: 22px 20px;
+    box-shadow: 0 2px 6px rgba(27, 67, 50, 0.05);
+}
+
+.card h3 {
+    margin: 0 0 10px;
+    color: var(--green-dark);
+    font-size: 1.05rem;
+}
+
+.card p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+/* Footer */
+
+.site-footer {
+    background: var(--green-dark);
+    color: var(--green-pale);
+    padding: 22px 0;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.site-footer p {
+    margin: 0;
+}

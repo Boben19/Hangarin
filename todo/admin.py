@@ -2,6 +2,10 @@ from django.contrib import admin
 
 from .models import Category, Note, Priority, SubTask, Task
 
+admin.site.site_header = "Hangarin Admin"
+admin.site.site_title = "Hangarin"
+admin.site.index_title = "Dashboard"
+
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
