@@ -13,7 +13,7 @@ SECRET_KEY = 'django-insecure-change-this-before-you-deploy-anywhere'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['boben19.pythonanywhere.com', 'localhost', '127.0.0.1']
 # When you deploy to PythonAnywhere, add your subdomain here, e.g.:
 # ALLOWED_HOSTS = ['yourusername.pythonanywhere.com']
 
