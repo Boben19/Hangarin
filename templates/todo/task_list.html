@@ -8,7 +8,7 @@
         <h1>Tasks</h1>
         <p class="page-sub">{{ paginator.count }} task{{ paginator.count|pluralize }} on the list.</p>
     </div>
-    <a href="/admin/todo/task/add/" class="btn btn-primary btn-small">+ New task</a>
+    <a href="{% url 'task-create' %}" class="btn btn-primary btn-small">+ New task</a>
 </div>
 
 <form class="toolbar" method="get">
@@ -31,10 +31,17 @@
     {% for task in tasks %}
     <article class="task-card status-{{ task.status|slugify }}">
         <div class="task-card-top">
-            <span class="badge badge-{{ task.status|slugify }}">{{ task.status }}</span>
+            <button type="button"
+                    class="status-toggle badge badge-{{ task.status|slugify }}"
+                    data-toggle-url="{% url 'task-toggle-status' task.pk %}"
+                    title="Click to move to the next status">
+                {{ task.status }}
+            </button>
             {% if task.priority %}<span class="chip chip-priority">{{ task.priority.name }}</span>{% endif %}
         </div>
-        <h3 class="task-title">{{ task.title }}</h3>
+        <a href="{% url 'task-detail' task.pk %}" class="task-title-link">
+            <h3 class="task-title">{{ task.title }}</h3>
+        </a>
         {% if task.description %}<p class="task-desc">{{ task.description|truncatewords:20 }}</p>{% endif %}
         <div class="task-meta">
             {% if task.category %}<span class="chip chip-category">{{ task.category.name }}</span>{% endif %}
@@ -43,6 +50,10 @@
         <div class="task-foot">
             <span>{{ task.subtasks.count }} subtask{{ task.subtasks.count|pluralize }}</span>
             <span>{{ task.notes.count }} note{{ task.notes.count|pluralize }}</span>
+            <span class="row-actions task-card-actions">
+                <a href="{% url 'task-update' task.pk %}" title="Edit">✎</a>
+                <a href="{% url 'task-delete' task.pk %}" title="Delete">🗑</a>
+            </span>
         </div>
     </article>
     {% endfor %}
@@ -51,7 +62,7 @@
 <div class="empty-state">
     <span class="empty-leaf">🌱</span>
     <h3>Nothing here yet</h3>
-    <p>{% if query %}No tasks match "{{ query }}".{% else %}Add your first task from the admin to see it planted here.{% endif %}</p>
+    <p>{% if query %}No tasks match "{{ query }}".{% else %}Add your first task above to see it planted here.{% endif %}</p>
 </div>
 {% endif %}
 

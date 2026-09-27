@@ -8,7 +8,7 @@
         <h1>Categories</h1>
         <p class="page-sub">{{ paginator.count }} categor{{ paginator.count|pluralize:"y,ies" }} to sort your tasks into.</p>
     </div>
-    <a href="/admin/todo/category/add/" class="btn btn-primary btn-small">+ New category</a>
+    <a href="{% url 'category-create' %}" class="btn btn-primary btn-small">+ New category</a>
 </div>
 
 <form class="toolbar" method="get">
@@ -25,7 +25,13 @@
 <div class="tag-grid">
     {% for category in categories %}
     <div class="tag-card">
-        <span class="tag-name">{{ category.name }}</span>
+        <div class="tag-card-top">
+            <span class="tag-name">{{ category.name }}</span>
+            <span class="row-actions">
+                <a href="{% url 'category-update' category.pk %}" title="Edit">✎</a>
+                <a href="{% url 'category-delete' category.pk %}" title="Delete">🗑</a>
+            </span>
+        </div>
         <span class="tag-count">{{ category.tasks.count }} task{{ category.tasks.count|pluralize }}</span>
     </div>
     {% endfor %}
@@ -34,7 +40,7 @@
 <div class="empty-state">
     <span class="empty-leaf">▤</span>
     <h3>No categories yet</h3>
-    <p>{% if query %}Nothing matches "{{ query }}".{% else %}Add one from the admin to start sorting your tasks.{% endif %}</p>
+    <p>{% if query %}Nothing matches "{{ query }}".{% else %}Add one above to start sorting your tasks.{% endif %}</p>
 </div>
 {% endif %}
 

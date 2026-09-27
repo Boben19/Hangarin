@@ -33,6 +33,8 @@
             </a>
             <p class="side-tag">grow your to-do list</p>
 
+            <a href="{% url 'task-create' %}" class="btn btn-primary btn-small side-new-btn">+ New task</a>
+
             <div class="side-links">
                 <a href="{% url 'home' %}" class="side-link {% if request.resolver_match.url_name == 'home' %}is-active{% endif %}">
                     <span class="side-ico">⌂</span> Home
@@ -58,6 +60,16 @@
         </nav>
 
         <main class="content">
+            {% if messages %}
+            <div class="toast-stack" id="toast-stack">
+                {% for message in messages %}
+                <div class="toast toast-{{ message.tags|default:'success' }}">
+                    <span>{{ message }}</span>
+                    <button type="button" class="toast-close" aria-label="Dismiss">&times;</button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
             {% block content %}{% endblock %}
         </main>
     </div>

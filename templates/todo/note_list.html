@@ -8,7 +8,7 @@
         <h1>Notes</h1>
         <p class="page-sub">{{ paginator.count }} note{{ paginator.count|pluralize }} tucked under your tasks.</p>
     </div>
-    <a href="/admin/todo/note/add/" class="btn btn-primary btn-small">+ New note</a>
+    <a href="{% url 'note-create' %}" class="btn btn-primary btn-small">+ New note</a>
 </div>
 
 <form class="toolbar" method="get">
@@ -26,9 +26,15 @@
 <div class="note-grid">
     {% for note in notes %}
     <article class="note-card">
-        <span class="note-task">{{ note.task.title }}</span>
+        <a href="{% url 'task-detail' note.task_id %}" class="note-task">{{ note.task.title }}</a>
         <p class="note-content">{{ note.content|truncatewords:28 }}</p>
-        <span class="note-date">{{ note.created_at|date:"M j, Y — g:i A" }}</span>
+        <div class="note-row-foot">
+            <span class="note-date">{{ note.created_at|date:"M j, Y — g:i A" }}</span>
+            <span class="row-actions">
+                <a href="{% url 'note-update' note.pk %}" title="Edit">✎</a>
+                <a href="{% url 'note-delete' note.pk %}" title="Delete">🗑</a>
+            </span>
+        </div>
     </article>
     {% endfor %}
 </div>
@@ -36,7 +42,7 @@
 <div class="empty-state">
     <span class="empty-leaf">✎</span>
     <h3>No notes yet</h3>
-    <p>{% if query %}Nothing matches "{{ query }}".{% else %}Jot something down against a task from the admin.{% endif %}</p>
+    <p>{% if query %}Nothing matches "{{ query }}".{% else %}Jot something down against a task to see it here.{% endif %}</p>
 </div>
 {% endif %}
 

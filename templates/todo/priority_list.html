@@ -8,7 +8,7 @@
         <h1>Priorities</h1>
         <p class="page-sub">{{ paginator.count }} priority level{{ paginator.count|pluralize }}, critical to optional.</p>
     </div>
-    <a href="/admin/todo/priority/add/" class="btn btn-primary btn-small">+ New priority</a>
+    <a href="{% url 'priority-create' %}" class="btn btn-primary btn-small">+ New priority</a>
 </div>
 
 <form class="toolbar" method="get">
@@ -25,7 +25,13 @@
 <div class="tag-grid">
     {% for priority in priorities %}
     <div class="tag-card">
-        <span class="tag-name">{{ priority.name }}</span>
+        <div class="tag-card-top">
+            <span class="tag-name">{{ priority.name }}</span>
+            <span class="row-actions">
+                <a href="{% url 'priority-update' priority.pk %}" title="Edit">✎</a>
+                <a href="{% url 'priority-delete' priority.pk %}" title="Delete">🗑</a>
+            </span>
+        </div>
         <span class="tag-count">{{ priority.tasks.count }} task{{ priority.tasks.count|pluralize }}</span>
     </div>
     {% endfor %}
@@ -34,7 +40,7 @@
 <div class="empty-state">
     <span class="empty-leaf">◆</span>
     <h3>No priorities yet</h3>
-    <p>{% if query %}Nothing matches "{{ query }}".{% else %}Add one from the admin to start ranking your tasks.{% endif %}</p>
+    <p>{% if query %}Nothing matches "{{ query }}".{% else %}Add one above to start ranking your tasks.{% endif %}</p>
 </div>
 {% endif %}
 

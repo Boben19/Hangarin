@@ -8,7 +8,7 @@
         <h1>Subtasks</h1>
         <p class="page-sub">{{ paginator.count }} subtask{{ paginator.count|pluralize }} across your tasks.</p>
     </div>
-    <a href="/admin/todo/subtask/add/" class="btn btn-primary btn-small">+ New subtask</a>
+    <a href="{% url 'subtask-create' %}" class="btn btn-primary btn-small">+ New subtask</a>
 </div>
 
 <form class="toolbar" method="get">
@@ -27,12 +27,19 @@
 <div class="row-list">
     {% for subtask in subtasks %}
     <div class="row-item">
-        <span class="row-dot status-{{ subtask.status|slugify }}"></span>
+        <button type="button"
+                class="status-toggle row-dot status-{{ subtask.status|slugify }}"
+                data-toggle-url="{% url 'subtask-toggle-status' subtask.pk %}"
+                title="Click to move to the next status"></button>
         <div class="row-main">
-            <span class="row-title">{{ subtask.title }}</span>
+            <a href="{% url 'task-detail' subtask.parent_task_id %}" class="row-title">{{ subtask.title }}</a>
             <span class="row-sub">part of <strong>{{ subtask.parent_task_name }}</strong></span>
         </div>
         <span class="badge badge-{{ subtask.status|slugify }}">{{ subtask.status }}</span>
+        <span class="row-actions">
+            <a href="{% url 'subtask-update' subtask.pk %}" title="Edit">✎</a>
+            <a href="{% url 'subtask-delete' subtask.pk %}" title="Delete">🗑</a>
+        </span>
     </div>
     {% endfor %}
 </div>
@@ -40,7 +47,7 @@
 <div class="empty-state">
     <span class="empty-leaf">🍃</span>
     <h3>No subtasks yet</h3>
-    <p>{% if query %}Nothing matches "{{ query }}".{% else %}Break a task down into smaller steps from the admin.{% endif %}</p>
+    <p>{% if query %}Nothing matches "{{ query }}".{% else %}Break a task down into smaller steps from its page.{% endif %}</p>
 </div>
 {% endif %}
 

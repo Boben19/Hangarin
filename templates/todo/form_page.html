@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}{{ form_title }} — Hangarin{% endblock %}
+
+{% block content %}
+<div class="form-page">
+    <div class="form-card">
+        <div class="form-card-head">
+            <div>
+                <h1>{{ form_title }}</h1>
+                {% if form_hint %}<p class="page-sub">{{ form_hint }}</p>{% endif %}
+            </div>
+            <a href="{{ cancel_url }}" class="form-close" aria-label="Close">&times;</a>
+        </div>
+
+        <form method="post" class="stack-form" novalidate>
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="field-error field-error-block">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            {% for field in form %}
+                {% if field.is_hidden %}
+                    {{ field }}
+                {% else %}
+                <div class="field{% if field.errors %} has-error{% endif %}">
+                    <label for="{{ field.id_for_label }}">
+                        {{ field.label }}{% if field.field.required %}<span class="req">*</span>{% endif %}
+                    </label>
+                    {{ field }}
+                    {% if field.help_text %}<p class="field-help">{{ field.help_text }}</p>{% endif %}
+                    {% for error in field.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+                </div>
+                {% endif %}
+            {% endfor %}
+
+            <div class="form-actions">
+                <a href="{{ cancel_url }}" class="btn btn-outline-green btn-small">Cancel</a>
+                <button type="submit" class="btn btn-primary btn-small">{{ submit_label|default:"Save" }}</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

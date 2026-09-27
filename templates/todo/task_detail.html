@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}{{ task.title }} — Hangarin{% endblock %}
+
+{% block content %}
+<a href="{% url 'task-list' %}" class="back-link">&larr; All tasks</a>
+
+<div class="detail-head status-{{ task.status|slugify }}">
+    <div class="detail-head-top">
+        <button type="button"
+                class="status-toggle badge badge-{{ task.status|slugify }}"
+                data-toggle-url="{% url 'task-toggle-status' task.pk %}"
+                title="Click to move this task to the next status">
+            {{ task.status }}
+        </button>
+        {% if task.priority %}<span class="chip chip-priority">{{ task.priority.name }}</span>{% endif %}
+        {% if task.category %}<span class="chip chip-category">{{ task.category.name }}</span>{% endif %}
+    </div>
+
+    <h1 class="detail-title">{{ task.title }}</h1>
+
+    {% if task.description %}
+        <p class="detail-desc">{{ task.description|linebreaksbr }}</p>
+    {% endif %}
+
+    <div class="detail-meta-row">
+        {% if task.deadline %}
+            <span class="task-deadline">📅 Due {{ task.deadline|date:"M j, Y — g:i A" }}</span>
+        {% endif %}
+        <span class="task-deadline">🕐 Added {{ task.created_at|date:"M j, Y" }}</span>
+    </div>
+
+    <div class="detail-actions">
+        <a href="{% url 'task-update' task.pk %}" class="btn btn-outline-green btn-small">Edit task</a>
+        <a href="{% url 'task-delete' task.pk %}" class="btn btn-danger-outline btn-small">Delete task</a>
+    </div>
+</div>
+
+<div class="detail-columns">
+    <section class="detail-col">
+        <div class="detail-col-head">
+            <h2>Subtasks</h2>
+            <span class="detail-col-count">{{ subtasks.count }}</span>
+        </div>
+
+        <form method="post" action="{% url 'subtask-create' %}?task={{ task.pk }}" class="inline-add-form">
+            {% csrf_token %}
+            {{ subtask_form.parent_task }}
+            {{ subtask_form.status }}
+            <input type="text" name="title" placeholder="Add a subtask and press enter…" class="field-input" required>
+            <button type="submit" class="btn btn-primary btn-small">Add</button>
+        </form>
+
+        {% if subtasks %}
+        <ul class="subtask-list">
+            {% for subtask in subtasks %}
+            <li class="subtask-row">
+                <button type="button"
+                        class="subtask-check status-{{ subtask.status|slugify }}"
+                        data-toggle-url="{% url 'subtask-toggle-status' subtask.pk %}"
+                        title="Click to move to the next status">
+                    {% if subtask.status == "Completed" %}✓{% endif %}
+                </button>
+                <span class="subtask-title">{{ subtask.title }}</span>
+                <span class="badge badge-{{ subtask.status|slugify }} subtask-badge">{{ subtask.status }}</span>
+                <span class="row-actions">
+                    <a href="{% url 'subtask-update' subtask.pk %}" title="Edit">✎</a>
+                    <a href="{% url 'subtask-delete' subtask.pk %}" title="Delete">🗑</a>
+                </span>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="detail-empty">No subtasks yet — break this down into smaller steps above.</p>
+        {% endif %}
+    </section>
+
+    <section class="detail-col">
+        <div class="detail-col-head">
+            <h2>Notes</h2>
+            <span class="detail-col-count">{{ notes.count }}</span>
+        </div>
+
+        <form method="post" action="{% url 'note-create' %}?task={{ task.pk }}" class="inline-add-form inline-add-form-stack">
+            {% csrf_token %}
+            {{ note_form.task }}
+            <textarea name="content" rows="2" placeholder="Jot something down…" class="field-input field-textarea" required></textarea>
+            <button type="submit" class="btn btn-primary btn-small">Add note</button>
+        </form>
+
+        {% if notes %}
+        <ul class="note-list-simple">
+            {% for note in notes %}
+            <li class="note-row">
+                <p>{{ note.content|linebreaksbr }}</p>
+                <div class="note-row-foot">
+                    <span class="note-date">{{ note.created_at|date:"M j, Y — g:i A" }}</span>
+                    <span class="row-actions">
+                        <a href="{% url 'note-update' note.pk %}" title="Edit">✎</a>
+                        <a href="{% url 'note-delete' note.pk %}" title="Delete">🗑</a>
+                    </span>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="detail-empty">Nothing written down yet.</p>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

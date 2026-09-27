@@ -13,7 +13,7 @@
         </p>
         <div class="hero-actions">
             <a href="{% url 'task-list' %}" class="btn btn-primary">View my tasks</a>
-            <a href="/admin/todo/task/add/" class="btn btn-outline">Add a task</a>
+            <a href="{% url 'task-create' %}" class="btn btn-outline">Add a task</a>
         </div>
     </div>
     <div class="hero-art" aria-hidden="true">
@@ -21,6 +21,17 @@
         <span class="leaf leaf-2">🍃</span>
         <span class="leaf leaf-3">🌿</span>
     </div>
+</section>
+
+<section class="quick-add-section">
+    <form method="post" action="{% url 'task-create' %}" class="quick-add-form">
+        {% csrf_token %}
+        <input type="hidden" name="status" value="Pending">
+        <input type="hidden" name="next" value="{% url 'home' %}">
+        <span class="quick-add-icon">🌱</span>
+        <input type="text" name="title" class="quick-add-input" placeholder="Quick-add a task — press enter to plant it…" required autofocus>
+        <button type="submit" class="btn btn-primary btn-small">Add</button>
+    </form>
 </section>
 
 <section class="stats">
@@ -64,4 +75,22 @@
         <p>From critical to optional, so you know what to open first.</p>
     </a>
 </section>
+
+{% if upcoming_tasks %}
+<section class="upcoming">
+    <h2>Due soon</h2>
+    <div class="row-list">
+        {% for task in upcoming_tasks %}
+        <a href="{% url 'task-detail' task.pk %}" class="row-item row-item-link">
+            <span class="row-dot status-{{ task.status|slugify }}"></span>
+            <div class="row-main">
+                <span class="row-title">{{ task.title }}</span>
+                <span class="row-sub">{{ task.deadline|date:"M j, Y — g:i A" }}</span>
+            </div>
+            <span class="badge badge-{{ task.status|slugify }}">{{ task.status }}</span>
+        </a>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
 {% endblock %}
