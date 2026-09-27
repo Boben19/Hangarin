@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Tasks — Hangarin{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1>Tasks</h1>
+        <p class="page-sub">{{ paginator.count }} task{{ paginator.count|pluralize }} on the list.</p>
+    </div>
+    <a href="/admin/todo/task/add/" class="btn btn-primary btn-small">+ New task</a>
+</div>
+
+<form class="toolbar" method="get">
+    <input type="search" name="q" value="{{ query }}" placeholder="Search title or description…" class="toolbar-search">
+    <select name="sort_by" class="toolbar-sort" onchange="this.form.submit()">
+        <option value="" {% if not sort_by %}selected{% endif %}>Newest first</option>
+        <option value="deadline" {% if sort_by == "deadline" %}selected{% endif %}>Deadline (soonest)</option>
+        <option value="-deadline" {% if sort_by == "-deadline" %}selected{% endif %}>Deadline (latest)</option>
+        <option value="title" {% if sort_by == "title" %}selected{% endif %}>Title (A–Z)</option>
+        <option value="-title" {% if sort_by == "-title" %}selected{% endif %}>Title (Z–A)</option>
+        <option value="priority__name" {% if sort_by == "priority__name" %}selected{% endif %}>Priority</option>
+        <option value="category__name" {% if sort_by == "category__name" %}selected{% endif %}>Category</option>
+    </select>
+    <button type="submit" class="btn btn-outline-green btn-small">Search</button>
+    {% if query or sort_by %}<a href="{% url 'task-list' %}" class="toolbar-clear">Clear</a>{% endif %}
+</form>
+
+{% if tasks %}
+<div class="task-grid">
+    {% for task in tasks %}
+    <article class="task-card status-{{ task.status|slugify }}">
+        <div class="task-card-top">
+            <span class="badge badge-{{ task.status|slugify }}">{{ task.status }}</span>
+            {% if task.priority %}<span class="chip chip-priority">{{ task.priority.name }}</span>{% endif %}
+        </div>
+        <h3 class="task-title">{{ task.title }}</h3>
+        {% if task.description %}<p class="task-desc">{{ task.description|truncatewords:20 }}</p>{% endif %}
+        <div class="task-meta">
+            {% if task.category %}<span class="chip chip-category">{{ task.category.name }}</span>{% endif %}
+            {% if task.deadline %}<span class="task-deadline">📅 {{ task.deadline|date:"M j, Y — g:i A" }}</span>{% endif %}
+        </div>
+        <div class="task-foot">
+            <span>{{ task.subtasks.count }} subtask{{ task.subtasks.count|pluralize }}</span>
+            <span>{{ task.notes.count }} note{{ task.notes.count|pluralize }}</span>
+        </div>
+    </article>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <span class="empty-leaf">🌱</span>
+    <h3>Nothing here yet</h3>
+    <p>{% if query %}No tasks match "{{ query }}".{% else %}Add your first task from the admin to see it planted here.{% endif %}</p>
+</div>
+{% endif %}
+
+{% include "todo/_pagination.html" %}
+{% endblock %}

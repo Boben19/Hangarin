@@ -1,0 +1,72 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Hangarin{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+    <input type="checkbox" id="nav-toggle" class="nav-toggle-check">
+
+    <header class="topbar">
+        <label for="nav-toggle" class="hamburger" aria-label="Toggle menu">
+            <span></span><span></span><span></span>
+        </label>
+        <a href="{% url 'home' %}" class="brand">
+            <span class="brand-mark">🌱</span> Hangarin
+        </a>
+        <a href="/admin/" class="topbar-admin-link">Admin</a>
+    </header>
+
+    <div class="app-shell">
+        <nav class="sidebar">
+            <a href="{% url 'home' %}" class="side-brand">
+                <span class="brand-mark">🌱</span>
+                <span>Hangarin</span>
+            </a>
+            <p class="side-tag">grow your to-do list</p>
+
+            <div class="side-links">
+                <a href="{% url 'home' %}" class="side-link {% if request.resolver_match.url_name == 'home' %}is-active{% endif %}">
+                    <span class="side-ico">⌂</span> Home
+                </a>
+                <a href="{% url 'task-list' %}" class="side-link {% if request.resolver_match.url_name == 'task-list' %}is-active{% endif %}">
+                    <span class="side-ico">✓</span> Tasks
+                </a>
+                <a href="{% url 'subtask-list' %}" class="side-link {% if request.resolver_match.url_name == 'subtask-list' %}is-active{% endif %}">
+                    <span class="side-ico">↳</span> Subtasks
+                </a>
+                <a href="{% url 'note-list' %}" class="side-link {% if request.resolver_match.url_name == 'note-list' %}is-active{% endif %}">
+                    <span class="side-ico">✎</span> Notes
+                </a>
+                <a href="{% url 'category-list' %}" class="side-link {% if request.resolver_match.url_name == 'category-list' %}is-active{% endif %}">
+                    <span class="side-ico">▤</span> Categories
+                </a>
+                <a href="{% url 'priority-list' %}" class="side-link {% if request.resolver_match.url_name == 'priority-list' %}is-active{% endif %}">
+                    <span class="side-ico">◆</span> Priorities
+                </a>
+            </div>
+
+            <a href="/admin/" class="side-admin">Manage in admin →</a>
+        </nav>
+
+        <main class="content">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <footer class="site-footer">
+        <p>Hangarin &mdash; built by Jhon Grover Longsud</p>
+    </footer>
+
+    <script src="{% static 'js/app.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

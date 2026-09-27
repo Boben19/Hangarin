@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Hangarin — Home{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-text">
+        <h1>Plant a task.<br>Watch it grow.</h1>
+        <p class="lead">
+            Hangarin keeps your day organized in one place: tasks, the smaller
+            steps inside them, notes you don't want to lose, and the
+            categories and priorities that keep everything sorted.
+        </p>
+        <div class="hero-actions">
+            <a href="{% url 'task-list' %}" class="btn btn-primary">View my tasks</a>
+            <a href="/admin/todo/task/add/" class="btn btn-outline">Add a task</a>
+        </div>
+    </div>
+    <div class="hero-art" aria-hidden="true">
+        <span class="leaf leaf-1">🌱</span>
+        <span class="leaf leaf-2">🍃</span>
+        <span class="leaf leaf-3">🌿</span>
+    </div>
+</section>
+
+<section class="stats">
+    <div class="stat-card">
+        <span class="stat-number" data-count="{{ total_tasks }}">0</span>
+        <span class="stat-label">Total tasks</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-number" data-count="{{ pending_tasks }}">0</span>
+        <span class="stat-label">Still pending</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-number" data-count="{{ completed_tasks }}">0</span>
+        <span class="stat-label">Completed</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-number" data-count="{{ total_categories }}">0</span>
+        <span class="stat-label">Categories</span>
+    </div>
+</section>
+
+<section class="quick-grid">
+    <a href="{% url 'task-list' %}" class="quick-card">
+        <h3>Tasks</h3>
+        <p>Everything on your plate, sortable by deadline, category or priority.</p>
+    </a>
+    <a href="{% url 'subtask-list' %}" class="quick-card">
+        <h3>Subtasks</h3>
+        <p>Break the big stuff into steps you can actually knock out.</p>
+    </a>
+    <a href="{% url 'note-list' %}" class="quick-card">
+        <h3>Notes</h3>
+        <p>Context and reminders attached to the task they belong to.</p>
+    </a>
+    <a href="{% url 'category-list' %}" class="quick-card">
+        <h3>Categories</h3>
+        <p>Work, school, personal — however you like to split things up.</p>
+    </a>
+    <a href="{% url 'priority-list' %}" class="quick-card">
+        <h3>Priorities</h3>
+        <p>From critical to optional, so you know what to open first.</p>
+    </a>
+</section>
+{% endblock %}

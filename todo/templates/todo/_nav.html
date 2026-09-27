@@ -1,0 +1,13 @@
+<header class="site-header">
+    <div class="wrap nav-wrap">
+        <a class="brand" href="{% url 'home' %}">Hangarin</a>
+        <nav class="site-nav">
+            <a href="{% url 'task-list' %}">Tasks</a>
+            <a href="{% url 'subtask-list' %}">Subtasks</a>
+            <a href="{% url 'note-list' %}">Notes</a>
+            <a href="{% url 'category-list' %}">Categories</a>
+            <a href="{% url 'priority-list' %}">Priorities</a>
+        </nav>
+        <a class="btn btn-outline" href="{% url 'admin:index' %}">Admin Login</a>
+    </div>
+</header>

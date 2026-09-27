@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Categories — Hangarin{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1>Categories</h1>
+        <p class="page-sub">{{ paginator.count }} categor{{ paginator.count|pluralize:"y,ies" }} to sort your tasks into.</p>
+    </div>
+    <a href="/admin/todo/category/add/" class="btn btn-primary btn-small">+ New category</a>
+</div>
+
+<form class="toolbar" method="get">
+    <input type="search" name="q" value="{{ query }}" placeholder="Search categories…" class="toolbar-search">
+    <select name="sort_by" class="toolbar-sort" onchange="this.form.submit()">
+        <option value="name" {% if sort_by == "name" or not sort_by %}selected{% endif %}>A–Z</option>
+        <option value="-name" {% if sort_by == "-name" %}selected{% endif %}>Z–A</option>
+    </select>
+    <button type="submit" class="btn btn-outline-green btn-small">Search</button>
+    {% if query or sort_by %}<a href="{% url 'category-list' %}" class="toolbar-clear">Clear</a>{% endif %}
+</form>
+
+{% if categories %}
+<div class="tag-grid">
+    {% for category in categories %}
+    <div class="tag-card">
+        <span class="tag-name">{{ category.name }}</span>
+        <span class="tag-count">{{ category.tasks.count }} task{{ category.tasks.count|pluralize }}</span>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <span class="empty-leaf">▤</span>
+    <h3>No categories yet</h3>
+    <p>{% if query %}Nothing matches "{{ query }}".{% else %}Add one from the admin to start sorting your tasks.{% endif %}</p>
+</div>
+{% endif %}
+
+{% include "todo/_pagination.html" %}
+{% endblock %}

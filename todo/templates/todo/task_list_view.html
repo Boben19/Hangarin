@@ -1,0 +1,89 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tasks | Hangarin</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% include "todo/_list_styles.html" %}
+</head>
+<body>
+    {% include "todo/_nav.html" %}
+
+    <main class="wrap list-page">
+        <div class="list-header">
+            <h1>Tasks</h1>
+        </div>
+
+        <div class="toolbar">
+            <form method="get" action="{% url 'task-list' %}">
+                <input type="text" name="q" placeholder="Search title or description..."
+                       value="{{ query }}">
+                <button type="submit" class="btn btn-outline">Search</button>
+            </form>
+
+            <form method="get" action="{% url 'task-list' %}">
+                {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
+                <label for="sortSelect">Sort by</label>
+                <select id="sortSelect" name="sort_by">
+                    <option value="">Newest first</option>
+                    <option value="title" {% if sort_by == "title" %}selected{% endif %}>Title (A-Z)</option>
+                    <option value="-title" {% if sort_by == "-title" %}selected{% endif %}>Title (Z-A)</option>
+                    <option value="deadline" {% if sort_by == "deadline" %}selected{% endif %}>Deadline (earliest)</option>
+                    <option value="-deadline" {% if sort_by == "-deadline" %}selected{% endif %}>Deadline (latest)</option>
+                    <option value="priority__name" {% if sort_by == "priority__name" %}selected{% endif %}>Priority</option>
+                    <option value="category__name" {% if sort_by == "category__name" %}selected{% endif %}>Category</option>
+                </select>
+                <button type="submit" class="btn btn-outline">Sort</button>
+            </form>
+        </div>
+
+        {% if tasks %}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Status</th>
+                    <th>Deadline</th>
+                    <th>Priority</th>
+                    <th>Category</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for task in tasks %}
+                <tr>
+                    <td>{{ task.title }}</td>
+                    <td>{{ task.status }}</td>
+                    <td>{{ task.deadline|date:"M d, Y H:i"|default:"—" }}</td>
+                    <td>{{ task.priority.name|default:"—" }}</td>
+                    <td>{{ task.category.name|default:"—" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% if is_paginated %}
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if sort_by %}&sort_by={{ sort_by }}{% endif %}">&laquo; Prev</a>
+            {% endif %}
+            <span class="current">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if sort_by %}&sort_by={{ sort_by }}{% endif %}">Next &raquo;</a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% else %}
+        <p class="empty-state">No tasks found{% if query %} for "{{ query }}"{% endif %}.</p>
+        {% endif %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="wrap">
+            <p>&copy; {% now "Y" %} Hangarin. Created by Jhon Grover Longsud.</p>
+        </div>
+    </footer>
+</body>
+</html>

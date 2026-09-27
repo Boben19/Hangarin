@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Subtasks — Hangarin{% endblock %}
+
+{% block content %}
+<div class="page-head">
+    <div>
+        <h1>Subtasks</h1>
+        <p class="page-sub">{{ paginator.count }} subtask{{ paginator.count|pluralize }} across your tasks.</p>
+    </div>
+    <a href="/admin/todo/subtask/add/" class="btn btn-primary btn-small">+ New subtask</a>
+</div>
+
+<form class="toolbar" method="get">
+    <input type="search" name="q" value="{{ query }}" placeholder="Search subtask or parent task…" class="toolbar-search">
+    <select name="sort_by" class="toolbar-sort" onchange="this.form.submit()">
+        <option value="title" {% if sort_by == "title" or not sort_by %}selected{% endif %}>Title (A–Z)</option>
+        <option value="-title" {% if sort_by == "-title" %}selected{% endif %}>Title (Z–A)</option>
+        <option value="parent_task__title" {% if sort_by == "parent_task__title" %}selected{% endif %}>Parent task</option>
+        <option value="status" {% if sort_by == "status" %}selected{% endif %}>Status</option>
+    </select>
+    <button type="submit" class="btn btn-outline-green btn-small">Search</button>
+    {% if query or sort_by %}<a href="{% url 'subtask-list' %}" class="toolbar-clear">Clear</a>{% endif %}
+</form>
+
+{% if subtasks %}
+<div class="row-list">
+    {% for subtask in subtasks %}
+    <div class="row-item">
+        <span class="row-dot status-{{ subtask.status|slugify }}"></span>
+        <div class="row-main">
+            <span class="row-title">{{ subtask.title }}</span>
+            <span class="row-sub">part of <strong>{{ subtask.parent_task_name }}</strong></span>
+        </div>
+        <span class="badge badge-{{ subtask.status|slugify }}">{{ subtask.status }}</span>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <span class="empty-leaf">🍃</span>
+    <h3>No subtasks yet</h3>
+    <p>{% if query %}Nothing matches "{{ query }}".{% else %}Break a task down into smaller steps from the admin.{% endif %}</p>
+</div>
+{% endif %}
+
+{% include "todo/_pagination.html" %}
+{% endblock %}

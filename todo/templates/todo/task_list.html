@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Task List</title>
+</head>
+<body>
+    <h1>Task List</h1>
+    
+    <!-- Search Bar -->
+    <form method="get">
+        <input type="text" name="q" value="{{ query }}" placeholder="Search tasks...">
+        <button type="submit">Search</button>
+    </form>
+
+    <ul>
+      {% for task in tasks %}
+        <li>
+            <strong>{{ task.title }}</strong> 
+            {% if task.deadline %}- Due: {{ task.deadline }}{% endif %}
+            <p>{{ task.description }}</p>
+        </li>
+      {% empty %}
+        <li>No tasks found.</li>
+      {% endfor %}
+    </ul>
+</body>
+</html>

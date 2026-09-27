@@ -1,0 +1,71 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Priorities | Hangarin</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% include "todo/_list_styles.html" %}
+</head>
+<body>
+    {% include "todo/_nav.html" %}
+
+    <main class="wrap list-page">
+        <div class="list-header">
+            <h1>Priorities</h1>
+        </div>
+
+        <div class="toolbar">
+            <form method="get" action="{% url 'priority-list' %}">
+                <input type="text" name="q" placeholder="Search name..." value="{{ query }}">
+                <button type="submit" class="btn btn-outline">Search</button>
+            </form>
+
+            <form method="get" action="{% url 'priority-list' %}">
+                {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
+                <label for="sortSelect">Sort by</label>
+                <select id="sortSelect" name="sort_by">
+                    <option value="name" {% if sort_by == "name" or not sort_by %}selected{% endif %}>Name (A-Z)</option>
+                    <option value="-name" {% if sort_by == "-name" %}selected{% endif %}>Name (Z-A)</option>
+                </select>
+                <button type="submit" class="btn btn-outline">Sort</button>
+            </form>
+        </div>
+
+        {% if priorities %}
+        <table class="data-table">
+            <thead>
+                <tr><th>Name</th></tr>
+            </thead>
+            <tbody>
+                {% for priority in priorities %}
+                <tr><td>{{ priority.name }}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% if is_paginated %}
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if sort_by %}&sort_by={{ sort_by }}{% endif %}">&laquo; Prev</a>
+            {% endif %}
+            <span class="current">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if sort_by %}&sort_by={{ sort_by }}{% endif %}">Next &raquo;</a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% else %}
+        <p class="empty-state">No priorities found{% if query %} for "{{ query }}"{% endif %}.</p>
+        {% endif %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="wrap">
+            <p>&copy; {% now "Y" %} Hangarin. Created by Jhon Grover Longsud.</p>
+        </div>
+    </footer>
+</body>
+</html>

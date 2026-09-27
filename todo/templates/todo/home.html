@@ -6,14 +6,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hangarin | Task &amp; To-Do Manager</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% include "todo/_list_styles.html" %}
+    <style>
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1rem; margin: 2rem 0; }
+        .stat-card { background: #fff; border: 1px solid #eee; border-radius: 10px;
+            padding: 1.25rem; text-align: center; }
+        .stat-card .num { font-size: 2rem; font-weight: 700; display: block; }
+        .stat-card .label { color: #777; font-size: 0.9rem; }
+    </style>
 </head>
 <body>
-    <header class="site-header">
-        <div class="wrap">
-            <span class="brand">Hangarin</span>
-            <a class="btn btn-outline" href="{% url 'admin:index' %}">Admin Login</a>
-        </div>
-    </header>
+    {% include "todo/_nav.html" %}
 
     <main>
         <section class="hero">
@@ -23,7 +27,29 @@
                     Hangarin keeps your tasks, deadlines, priorities, and notes
                     in one place, so nothing important slips through.
                 </p>
-                <a class="btn btn-primary" href="{% url 'admin:index' %}">Go to Dashboard</a>
+                <a class="btn btn-primary" href="{% url 'task-list' %}">View Tasks</a>
+                <a class="btn btn-outline" href="{% url 'admin:index' %}">Go to Admin</a>
+            </div>
+        </section>
+
+        <section class="wrap">
+            <div class="stats">
+                <div class="stat-card">
+                    <span class="num">{{ total_tasks }}</span>
+                    <span class="label">Total Tasks</span>
+                </div>
+                <div class="stat-card">
+                    <span class="num">{{ pending_tasks }}</span>
+                    <span class="label">Pending</span>
+                </div>
+                <div class="stat-card">
+                    <span class="num">{{ completed_tasks }}</span>
+                    <span class="label">Completed</span>
+                </div>
+                <div class="stat-card">
+                    <span class="num">{{ total_categories }}</span>
+                    <span class="label">Categories</span>
+                </div>
             </div>
         </section>
 

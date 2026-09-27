@@ -1,0 +1,82 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subtasks | Hangarin</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% include "todo/_list_styles.html" %}
+</head>
+<body>
+    {% include "todo/_nav.html" %}
+
+    <main class="wrap list-page">
+        <div class="list-header">
+            <h1>Subtasks</h1>
+        </div>
+
+        <div class="toolbar">
+            <form method="get" action="{% url 'subtask-list' %}">
+                <input type="text" name="q" placeholder="Search title or parent task..."
+                       value="{{ query }}">
+                <button type="submit" class="btn btn-outline">Search</button>
+            </form>
+
+            <form method="get" action="{% url 'subtask-list' %}">
+                {% if query %}<input type="hidden" name="q" value="{{ query }}">{% endif %}
+                <label for="sortSelect">Sort by</label>
+                <select id="sortSelect" name="sort_by">
+                    <option value="title" {% if sort_by == "title" or not sort_by %}selected{% endif %}>Title (A-Z)</option>
+                    <option value="-title" {% if sort_by == "-title" %}selected{% endif %}>Title (Z-A)</option>
+                    <option value="parent_task__title" {% if sort_by == "parent_task__title" %}selected{% endif %}>Parent task</option>
+                    <option value="status" {% if sort_by == "status" %}selected{% endif %}>Status</option>
+                </select>
+                <button type="submit" class="btn btn-outline">Sort</button>
+            </form>
+        </div>
+
+        {% if subtasks %}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Status</th>
+                    <th>Parent Task</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for subtask in subtasks %}
+                <tr>
+                    <td>{{ subtask.title }}</td>
+                    <td>{{ subtask.status }}</td>
+                    <td>{{ subtask.parent_task_name }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% if is_paginated %}
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if sort_by %}&sort_by={{ sort_by }}{% endif %}">&laquo; Prev</a>
+            {% endif %}
+            <span class="current">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if sort_by %}&sort_by={{ sort_by }}{% endif %}">Next &raquo;</a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% else %}
+        <p class="empty-state">No subtasks found{% if query %} for "{{ query }}"{% endif %}.</p>
+        {% endif %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="wrap">
+            <p>&copy; {% now "Y" %} Hangarin. Created by Jhon Grover Longsud.</p>
+        </div>
+    </footer>
+</body>
+</html>

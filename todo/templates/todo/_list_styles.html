@@ -1,0 +1,31 @@
+<style>
+    .nav-wrap { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; }
+    .site-nav { display: flex; gap: 1.25rem; flex-wrap: wrap; }
+    .site-nav a { text-decoration: none; color: inherit; opacity: 0.8; }
+    .site-nav a:hover { opacity: 1; text-decoration: underline; }
+
+    .list-page { padding: 2.5rem 0; }
+    .list-header { display: flex; align-items: baseline; justify-content: space-between;
+        flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem; }
+
+    .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem;
+        margin-bottom: 1.25rem; }
+    .toolbar input[type="text"], .toolbar select {
+        padding: 0.5rem 0.75rem; border: 1px solid #d6d6d6; border-radius: 6px;
+        font-size: 0.95rem;
+    }
+    .toolbar form { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+
+    table.data-table { width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; }
+    table.data-table th, table.data-table td {
+        text-align: left; padding: 0.65rem 0.75rem; border-bottom: 1px solid #eaeaea;
+    }
+    table.data-table th { font-weight: 600; color: #555; }
+    table.data-table tbody tr:hover { background: #fafafa; }
+
+    .empty-state { padding: 2rem 0; color: #777; }
+
+    .pagination { display: flex; gap: 0.75rem; align-items: center; }
+    .pagination a, .pagination span { text-decoration: none; color: inherit; }
+    .pagination .current { font-weight: 600; }
+</style>
