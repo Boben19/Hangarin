@@ -9,7 +9,7 @@ admin.site.index_title = "Dashboard"
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
-    list_display = ("title", "status", "deadline", "priority", "category")
+    list_display = ("title", "status", "deadline", "priority", "category", "owner")
     list_filter = ("status", "priority", "category")
     search_fields = ("title", "description")
 

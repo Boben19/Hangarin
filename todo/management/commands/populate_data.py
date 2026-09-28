@@ -1,6 +1,7 @@
 import random
 
-from django.core.management.base import BaseCommand
+from django.contrib.auth import get_user_model
+from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
 from faker import Faker
 
@@ -36,8 +37,28 @@ class Command(BaseCommand):
             default=2,
             help="Max Notes to generate per Task (default: 2).",
         )
+        parser.add_argument(
+            "--username",
+            type=str,
+            default=None,
+            help="Who the generated tasks belong to. Defaults to the first superuser.",
+        )
 
     def handle(self, *args, **options):
+        User = get_user_model()
+        if options["username"]:
+            try:
+                owner = User.objects.get(username=options["username"])
+            except User.DoesNotExist:
+                raise CommandError(f'No user named "{options["username"]}". Sign up first.')
+        else:
+            owner = User.objects.filter(is_superuser=True).order_by("id").first()
+            if owner is None:
+                raise CommandError(
+                    "No user to own the fake data yet — sign up (or run "
+                    "createsuperuser) and pass --username, then try again."
+                )
+
         self.stdout.write("Setting up priorities and categories...")
         priorities = [
             Priority.objects.get_or_create(name=name)[0] for name in PRIORITY_NAMES
@@ -50,7 +71,7 @@ class Command(BaseCommand):
         subtasks_per_task = options["subtasks_per_task"]
         notes_per_task = options["notes_per_task"]
 
-        self.stdout.write(f"Generating {task_count} tasks...")
+        self.stdout.write(f"Generating {task_count} tasks for {owner}...")
         tasks = []
         for _ in range(task_count):
             task = Task.objects.create(
@@ -60,6 +81,7 @@ class Command(BaseCommand):
                 status=fake.random_element(elements=STATUS_VALUES),
                 category=random.choice(categories),
                 priority=random.choice(priorities),
+                owner=owner,
             )
             tasks.append(task)
 

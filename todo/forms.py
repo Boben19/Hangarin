@@ -2,9 +2,7 @@ from django import forms
 
 from .models import Category, Note, Priority, SubTask, Task
 
-# Every widget below carries the same "field-input" class so the
-# form CSS only has to style one thing. Nothing fancy — just enough
-# so a text box and a select box don't look like two different apps.
+# every widget gets the same "field-input" class so one CSS rule styles them all
 
 INPUT = "field-input"
 TEXTAREA = "field-input field-textarea"

@@ -1,0 +1,44 @@
+{% extends "base_auth.html" %}
+
+{% block title %}Log in — Hangarin{% endblock %}
+
+{% block auth_content %}
+<div class="auth-card">
+    <div class="auth-brand">
+        <span class="auth-mark">🌱</span>
+        <h1>Welcome back</h1>
+        <p class="auth-sub">Pick up where your list left off.</p>
+    </div>
+
+    {% include "account/_social_buttons.html" %}
+
+    <div class="auth-divider"><span>or use your username</span></div>
+
+    <form method="post" action="{% url 'account_login' %}" class="auth-form" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+        <div class="field-error field-error-block">{{ form.non_field_errors.0 }}</div>
+        {% endif %}
+
+        <label class="auth-label" for="{{ form.login.id_for_label }}">Username or email</label>
+        {{ form.login }}
+        {% if form.login.errors %}<p class="field-error">{{ form.login.errors.0 }}</p>{% endif %}
+
+        <label class="auth-label" for="{{ form.password.id_for_label }}">Password</label>
+        {{ form.password }}
+        {% if form.password.errors %}<p class="field-error">{{ form.password.errors.0 }}</p>{% endif %}
+
+        <div class="auth-row">
+            <label class="auth-check">{{ form.remember }} <span>Keep me logged in</span></label>
+            <a href="{% url 'account_reset_password' %}" class="auth-link">Forgot password?</a>
+        </div>
+
+        {% if redirect_field_value %}
+        <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}">
+        {% endif %}
+        <button type="submit" class="btn btn-primary auth-submit">Log in</button>
+    </form>
+
+    <p class="auth-switch">New here? <a href="{% url 'account_signup' %}">Create an account</a></p>
+</div>
+{% endblock %}

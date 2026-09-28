@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 
@@ -64,6 +65,14 @@ class Task(BaseModel):
         null=True,
         blank=True,
         related_name="tasks",
+    )
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="tasks",
+        help_text="Whoever's list this belongs to.",
     )
 
     class Meta:

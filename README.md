@@ -67,6 +67,24 @@ by status; Notes by date; Categories and Priorities by name.
 
 ---
 
+## Login & accounts
+
+Everything sits behind a login. You can sign up with a username and
+password, or use Google, Facebook or GitHub. Tasks (and their subtasks and
+notes) belong to the account that made them, so each person only sees
+their own list. Categories and priorities are shared.
+
+To turn on the social buttons, copy `.env.example` to `.env`, fill in the
+client ID and secret for each provider, and register the callback URLs
+listed in that file. On PythonAnywhere, set the same variables in the WSGI
+file with `os.environ[...]` before the app loads. Also add your domain
+under Sites in `/admin/`.
+
+After pulling these changes run `python manage.py migrate`. Fake data for
+your own account: `python manage.py populate_data --username yourname`.
+
+---
+
 <a name="getting-started"></a>
 ## 🚀 Getting Started
 

@@ -1,0 +1,33 @@
+{% extends "base_auth.html" %}
+
+{% block title %}Almost there — Hangarin{% endblock %}
+
+{% block auth_content %}
+<div class="auth-card">
+    <div class="auth-brand">
+        <span class="auth-mark">🌿</span>
+        <h1>One last step</h1>
+        <p class="auth-sub">Pick a username for your Hangarin account.</p>
+    </div>
+
+    <form method="post" action="{% url 'socialaccount_signup' %}" class="auth-form" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+        <div class="field-error field-error-block">{{ form.non_field_errors.0 }}</div>
+        {% endif %}
+
+        <label class="auth-label" for="{{ form.username.id_for_label }}">Username</label>
+        {{ form.username }}
+        {% if form.username.errors %}<p class="field-error">{{ form.username.errors.0 }}</p>{% endif %}
+
+        <label class="auth-label" for="{{ form.email.id_for_label }}">Email</label>
+        {{ form.email }}
+        {% if form.email.errors %}<p class="field-error">{{ form.email.errors.0 }}</p>{% endif %}
+
+        {% if redirect_field_value %}
+        <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}">
+        {% endif %}
+        <button type="submit" class="btn btn-primary auth-submit">Finish signing up</button>
+    </form>
+</div>
+{% endblock %}

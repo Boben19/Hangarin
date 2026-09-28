@@ -1,0 +1,47 @@
+{% extends "base_auth.html" %}
+
+{% block title %}Sign up — Hangarin{% endblock %}
+
+{% block auth_content %}
+<div class="auth-card">
+    <div class="auth-brand">
+        <span class="auth-mark">🌿</span>
+        <h1>Start your list</h1>
+        <p class="auth-sub">Your tasks stay yours. Nobody else sees them.</p>
+    </div>
+
+    {% include "account/_social_buttons.html" %}
+
+    <div class="auth-divider"><span>or sign up with email</span></div>
+
+    <form method="post" action="{% url 'account_signup' %}" class="auth-form" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+        <div class="field-error field-error-block">{{ form.non_field_errors.0 }}</div>
+        {% endif %}
+
+        <label class="auth-label" for="{{ form.username.id_for_label }}">Username</label>
+        {{ form.username }}
+        {% if form.username.errors %}<p class="field-error">{{ form.username.errors.0 }}</p>{% endif %}
+
+        <label class="auth-label" for="{{ form.email.id_for_label }}">Email</label>
+        {{ form.email }}
+        {% if form.email.errors %}<p class="field-error">{{ form.email.errors.0 }}</p>{% endif %}
+
+        <label class="auth-label" for="{{ form.password1.id_for_label }}">Password</label>
+        {{ form.password1 }}
+        {% if form.password1.errors %}<p class="field-error">{{ form.password1.errors.0 }}</p>{% endif %}
+
+        <label class="auth-label" for="{{ form.password2.id_for_label }}">Confirm password</label>
+        {{ form.password2 }}
+        {% if form.password2.errors %}<p class="field-error">{{ form.password2.errors.0 }}</p>{% endif %}
+
+        {% if redirect_field_value %}
+        <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}">
+        {% endif %}
+        <button type="submit" class="btn btn-primary auth-submit">Create account</button>
+    </form>
+
+    <p class="auth-switch">Already have an account? <a href="{% url 'account_login' %}">Log in</a></p>
+</div>
+{% endblock %}

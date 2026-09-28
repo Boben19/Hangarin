@@ -1,10 +1,11 @@
 from django.contrib import admin
-from django.urls import path
+from django.urls import include, path
 
 from todo import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('accounts/', include('allauth.urls')),
     path('', views.HomePageView.as_view(), name='home'),
 
     # Tasks

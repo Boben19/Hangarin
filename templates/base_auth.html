@@ -1,0 +1,38 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Hangarin{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body class="auth-body">
+    <div class="auth-page">
+        <div class="auth-backdrop" aria-hidden="true">
+            <span class="drift drift-1">🌱</span>
+            <span class="drift drift-2">🍃</span>
+            <span class="drift drift-3">🌿</span>
+            <span class="drift drift-4">🍀</span>
+            <span class="drift drift-5">🍃</span>
+        </div>
+
+        {% if messages %}
+        <div class="toast-stack" id="toast-stack">
+            {% for message in messages %}
+            <div class="toast toast-{{ message.tags|default:'success' }}">
+                <span>{{ message }}</span>
+                <button type="button" class="toast-close" aria-label="Dismiss">&times;</button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block auth_content %}{% endblock %}
+    </div>
+    <script src="{% static 'js/app.js' %}"></script>
+</body>
+</html>

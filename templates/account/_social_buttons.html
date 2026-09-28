@@ -1,0 +1,12 @@
+{% load socialaccount %}
+<div class="social-buttons">
+    <a href="{% provider_login_url 'google' process='login' %}" class="btn btn-social btn-google">
+        <span class="social-ico">G</span> Continue with Google
+    </a>
+    <a href="{% provider_login_url 'facebook' process='login' %}" class="btn btn-social btn-facebook">
+        <span class="social-ico">f</span> Continue with Facebook
+    </a>
+    <a href="{% provider_login_url 'github' process='login' %}" class="btn btn-social btn-github">
+        <span class="social-ico">&#9679;</span> Continue with GitHub
+    </a>
+</div>

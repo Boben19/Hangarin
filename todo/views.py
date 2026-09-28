@@ -16,37 +16,29 @@ from .models import Category, Note, Priority, SubTask, Task
 
 
 class HomePageView(TemplateView):
-    """
-    Landing page / dashboard. Shows quick counts so the user has
-    an at-a-glance view of their workload as soon as they land,
-    plus a fast way to drop in a new task without digging for it.
-    """
+    """Dashboard with counts and a quick-add box."""
     template_name = "todo/home.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["total_tasks"] = Task.objects.count()
-        context["pending_tasks"] = Task.objects.filter(
+        my_tasks = Task.objects.filter(owner=self.request.user)
+        context["total_tasks"] = my_tasks.count()
+        context["pending_tasks"] = my_tasks.filter(
             status=Task.Status.PENDING
         ).count()
-        context["completed_tasks"] = Task.objects.filter(
+        context["completed_tasks"] = my_tasks.filter(
             status=Task.Status.COMPLETED
         ).count()
         context["total_categories"] = Category.objects.count()
         context["upcoming_tasks"] = (
-            Task.objects.exclude(status=Task.Status.COMPLETED)
+            my_tasks.exclude(status=Task.Status.COMPLETED)
             .exclude(deadline__isnull=True)
             .order_by("deadline")[:5]
         )
         return context
 
 
-# ----------------------------------------------------------------
-# Shared bits for the create/edit pages. One template renders all
-# of them — a title, a cancel link, and whatever fields the form
-# class defines — so a new field on a model doesn't need a new
-# template to go with it.
-# ----------------------------------------------------------------
+# one template for all create/edit forms, one for all delete confirmations
 
 class FormPageMixin:
     template_name = "todo/form_page.html"
@@ -94,7 +86,9 @@ class TaskListView(ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        qs = super().get_queryset().select_related("category", "priority")
+        qs = super().get_queryset().select_related("category", "priority").filter(
+            owner=self.request.user
+        )
         query = self.request.GET.get("q")
         if query:
             qs = qs.filter(
@@ -130,6 +124,9 @@ class TaskDetailView(DetailView):
     template_name = "todo/task_detail.html"
     context_object_name = "task"
 
+    def get_queryset(self):
+        return super().get_queryset().filter(owner=self.request.user)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["subtasks"] = self.object.subtasks.all().order_by("title")
@@ -153,6 +150,10 @@ class TaskCreateView(SuccessMessageMixin, FormPageMixin, CreateView):
     form_hint = "Plant something new on your list."
     success_message = '"%(title)s" was added to your tasks.'
 
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
+
     def get_success_url(self):
         next_url = self.request.POST.get("next")
         if next_url and next_url.startswith("/"):
@@ -170,6 +171,9 @@ class TaskUpdateView(SuccessMessageMixin, FormPageMixin, UpdateView):
     submit_label = "Save changes"
     success_message = '"%(title)s" was updated.'
 
+    def get_queryset(self):
+        return super().get_queryset().filter(owner=self.request.user)
+
     def get_success_url(self):
         return reverse("task-detail", args=[self.object.pk])
 
@@ -179,6 +183,9 @@ class TaskUpdateView(SuccessMessageMixin, FormPageMixin, UpdateView):
 
 class TaskDeleteView(DeletePageMixin, DeleteView):
     model = Task
+
+    def get_queryset(self):
+        return super().get_queryset().filter(owner=self.request.user)
 
     def get_object_label(self):
         task = self.get_object()
@@ -203,7 +210,7 @@ class TaskDeleteView(DeletePageMixin, DeleteView):
 @require_POST
 def toggle_task_status(request, pk):
     """Click-to-cycle: Pending -> In Progress -> Completed -> Pending."""
-    task = get_object_or_404(Task, pk=pk)
+    task = get_object_or_404(Task, pk=pk, owner=request.user)
     order = [Task.Status.PENDING, Task.Status.IN_PROGRESS, Task.Status.COMPLETED]
     current = order.index(task.status) if task.status in order else 0
     task.status = order[(current + 1) % len(order)]
@@ -231,7 +238,9 @@ class SubTaskListView(ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        qs = super().get_queryset().select_related("parent_task")
+        qs = super().get_queryset().select_related("parent_task").filter(
+            parent_task__owner=self.request.user
+        )
         query = self.request.GET.get("q")
         if query:
             qs = qs.filter(
@@ -273,6 +282,9 @@ class SubTaskCreateView(SuccessMessageMixin, FormPageMixin, CreateView):
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
+        form.fields["parent_task"].queryset = Task.objects.filter(
+            owner=self.request.user
+        )
         if self.request.GET.get("task"):
             form.fields["parent_task"].widget = forms.HiddenInput()
         return form
@@ -294,6 +306,9 @@ class SubTaskUpdateView(SuccessMessageMixin, FormPageMixin, UpdateView):
     submit_label = "Save changes"
     success_message = '"%(title)s" was updated.'
 
+    def get_queryset(self):
+        return super().get_queryset().filter(parent_task__owner=self.request.user)
+
     def get_success_url(self):
         return reverse("task-detail", args=[self.object.parent_task_id])
 
@@ -303,6 +318,9 @@ class SubTaskUpdateView(SuccessMessageMixin, FormPageMixin, UpdateView):
 
 class SubTaskDeleteView(DeletePageMixin, DeleteView):
     model = SubTask
+
+    def get_queryset(self):
+        return super().get_queryset().filter(parent_task__owner=self.request.user)
 
     def get_object_label(self):
         return f'the subtask "{self.get_object().title}"'
@@ -317,7 +335,7 @@ class SubTaskDeleteView(DeletePageMixin, DeleteView):
 
 @require_POST
 def toggle_subtask_status(request, pk):
-    subtask = get_object_or_404(SubTask, pk=pk)
+    subtask = get_object_or_404(SubTask, pk=pk, parent_task__owner=request.user)
     order = [SubTask.Status.PENDING, SubTask.Status.IN_PROGRESS, SubTask.Status.COMPLETED]
     current = order.index(subtask.status) if subtask.status in order else 0
     subtask.status = order[(current + 1) % len(order)]
@@ -345,7 +363,9 @@ class NoteListView(ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        qs = super().get_queryset().select_related("task")
+        qs = super().get_queryset().select_related("task").filter(
+            task__owner=self.request.user
+        )
         query = self.request.GET.get("q")
         if query:
             qs = qs.filter(
@@ -383,6 +403,7 @@ class NoteCreateView(SuccessMessageMixin, FormPageMixin, CreateView):
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
+        form.fields["task"].queryset = Task.objects.filter(owner=self.request.user)
         if self.request.GET.get("task"):
             form.fields["task"].widget = forms.HiddenInput()
         return form
@@ -404,6 +425,9 @@ class NoteUpdateView(SuccessMessageMixin, FormPageMixin, UpdateView):
     submit_label = "Save changes"
     success_message = "Note updated."
 
+    def get_queryset(self):
+        return super().get_queryset().filter(task__owner=self.request.user)
+
     def get_success_url(self):
         return reverse("task-detail", args=[self.object.task_id])
 
@@ -414,6 +438,9 @@ class NoteUpdateView(SuccessMessageMixin, FormPageMixin, UpdateView):
 class NoteDeleteView(DeletePageMixin, DeleteView):
     model = Note
     object_label = "this note"
+
+    def get_queryset(self):
+        return super().get_queryset().filter(task__owner=self.request.user)
 
     def get_cancel_url(self):
         return reverse("task-detail", args=[self.object.task_id])

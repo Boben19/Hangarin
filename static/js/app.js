@@ -1,6 +1,4 @@
-// A handful of small, independent bits of front-end polish.
-// None of it is load-bearing — every page still works with JS off,
-// this just makes the ones with it on feel a little more alive.
+// small extras, the site still works without JS
 
 document.addEventListener("DOMContentLoaded", function () {
     initStatCounters();
@@ -21,7 +19,7 @@ function getCookie(name) {
     return value;
 }
 
-// Counts each stat card up from 0 to its real value once, on page load.
+// stat numbers count up on load
 function initStatCounters() {
     var prefersReducedMotion = window.matchMedia(
         "(prefers-reduced-motion: reduce)"
@@ -52,8 +50,7 @@ function initStatCounters() {
     });
 }
 
-// Close the mobile nav automatically after picking a link, so it
-// doesn't stay open when the next page loads.
+// close the mobile menu after tapping a link
 function initMobileNavClose() {
     var navToggle = document.getElementById("nav-toggle");
     document.querySelectorAll(".sidebar a").forEach(function (link) {
@@ -63,8 +60,7 @@ function initMobileNavClose() {
     });
 }
 
-// Success/error messages fade themselves out, or can be dismissed
-// by hand with the little × button.
+// toasts fade out on their own, or close with the x
 function initToasts() {
     var stack = document.getElementById("toast-stack");
     if (!stack) return;
@@ -88,9 +84,7 @@ function initToasts() {
     });
 }
 
-// Status badges/dots with a data-toggle-url double as buttons: one
-// click cycles Pending -> In Progress -> Completed without leaving
-// the page, via the toggle-status endpoints.
+// click a status badge to cycle Pending -> In Progress -> Completed
 function initStatusToggles() {
     document.querySelectorAll("[data-toggle-url]").forEach(function (btn) {
         btn.addEventListener("click", function () {
@@ -112,8 +106,7 @@ function initStatusToggles() {
                 })
                 .then(function (data) { applyStatus(btn, data); })
                 .catch(function () {
-                    // Something went wrong (offline, expired session…) —
-                    // reload so the page reflects whatever the real state is.
+                    // request failed, just reload
                     window.location.reload();
                 })
                 .finally(function () {
@@ -159,8 +152,7 @@ function applyStatus(el, data) {
     if (head) swapPrefixedClass(head, "status-", data.slug);
 }
 
-// Search boxes on the list pages submit themselves a moment after
-// you stop typing, so results update without reaching for Enter.
+// list search submits half a second after you stop typing
 function initSearchAutoSubmit() {
     document.querySelectorAll(".toolbar-search").forEach(function (input) {
         var timer = null;
@@ -172,3 +164,23 @@ function initSearchAutoSubmit() {
         });
     });
 }
+
+// fade out before following an internal link (not new tabs, downloads, #anchors)
+document.addEventListener("click", function (e) {
+    var link = e.target.closest("a[href]");
+    if (!link) return;
+    var href = link.getAttribute("href");
+    if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+    if (link.target === "_blank" || link.hasAttribute("download")) return;
+    if (!href || href.charAt(0) === "#" || link.origin !== window.location.origin) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    e.preventDefault();
+    document.body.classList.add("is-leaving");
+    window.setTimeout(function () { window.location.href = link.href; }, 170);
+});
+
+// back button restores the page with the fade class still on
+window.addEventListener("pageshow", function () {
+    document.body.classList.remove("is-leaving");
+});

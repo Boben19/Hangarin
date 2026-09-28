@@ -22,7 +22,11 @@
         <a href="{% url 'home' %}" class="brand">
             <span class="brand-mark">🌱</span> Hangarin
         </a>
+        {% if user.is_staff %}
         <a href="/admin/" class="topbar-admin-link">Admin</a>
+        {% else %}
+        <a href="{% url 'account_logout' %}" class="topbar-admin-link">Log out</a>
+        {% endif %}
     </header>
 
     <div class="app-shell">
@@ -56,7 +60,18 @@
                 </a>
             </div>
 
-            <a href="/admin/" class="side-admin">Manage in admin →</a>
+            <div class="side-foot">
+                <div class="side-user">
+                    <span class="side-avatar">{{ user.username|default:user.email|first|upper }}</span>
+                    <div class="side-user-info">
+                        <span class="side-user-name">{{ user.username|default:user.email }}</span>
+                        <a href="{% url 'account_logout' %}" class="side-logout">Log out</a>
+                    </div>
+                </div>
+                {% if user.is_staff %}
+                <a href="/admin/" class="side-admin">Manage in admin →</a>
+                {% endif %}
+            </div>
         </nav>
 
         <main class="content">
