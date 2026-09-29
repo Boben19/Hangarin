@@ -8,3 +8,7 @@ staticfiles/
 .DS_Store
 *.log
 .env
+
+.venv/
+__pycache__/
+*.pyc
