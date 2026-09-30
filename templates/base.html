@@ -1,4 +1,5 @@
 {% load static %}
+{% load pwa %}
 <!DOCTYPE html>
 <html lang="en" data-theme="{{ my_profile.theme|default:'system' }}">
 <head>
@@ -12,6 +13,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% progressive_web_app_meta %}
     {% block extra_head %}{% endblock %}
 </head>
 <body class="{% block body_class %}{% endblock %}">
@@ -83,6 +85,7 @@
                         <button type="submit" class="side-logout">Log out</button>
                     </form>
                 </div>
+                <button type="button" class="side-install" data-install hidden>Install Hangarin</button>
                 {% if user.is_staff %}
                 <a href="/{{ ADMIN_URL|default:'admin/' }}" class="side-admin">Manage in admin →</a>
                 {% endif %}
@@ -110,6 +113,7 @@
     </footer>
 
     <script src="{% static 'js/app.js' %}" defer></script>
+    <script src="{% static 'js/pwa.js' %}" defer></script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>

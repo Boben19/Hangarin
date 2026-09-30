@@ -64,6 +64,7 @@ by status; Notes by date; Categories and Priorities by name.
 | Database | SQLite |
 | Seed data | Faker |
 | Styling | Custom CSS (green theme, landing page + admin) |
+| Installable app | django-pwa (manifest and service worker) |
 | Deployment | PythonAnywhere |
 
 ---
@@ -93,6 +94,67 @@ Small touches: confetti when you finish something (bigger for a level up or
 hitting your daily goal), a light/dark switch that follows you between
 devices, and keyboard shortcuts (`N` new task, `/` search, `?` for the list).
 Animations switch themselves off if your device asks for reduced motion.
+
+---
+
+## 🔑 Signing in with GitHub
+
+The "Continue with GitHub" button only shows up once the GitHub keys are in
+`.env`, so a half-finished setup never sends anyone to a broken page.
+
+1. On GitHub go to **Settings → Developer settings → OAuth Apps → New OAuth App**.
+2. Homepage URL: `http://127.0.0.1:8000`
+   Authorization callback URL: `http://127.0.0.1:8000/accounts/github/login/callback/`
+3. Click **Generate a new client secret**, then copy the Client ID and the
+   secret into `.env` as `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET`.
+4. Restart `runserver`. The button now appears on the login and signup pages.
+
+GitHub lets one OAuth app have several redirect URIs, so add the live site's
+(`https://boben19.pythonanywhere.com/accounts/github/login/callback/`) to the
+same app and use the same keys in the `.env` on the server.
+
+A new GitHub user gets an account named after their GitHub username (with a
+number added if it's taken), and their email is read from GitHub even if it's
+set to private. If that email already belongs to a password account, they
+aren't logged into it automatically. They're sent to a short form instead.
+
+---
+
+## 📱 Installing it as an app
+
+Hangarin is a Progressive Web App, built with `django-pwa`. Browsers can
+install it like a normal app (own window, own icon, no address bar), and if
+the connection drops you get a friendly offline page instead of a browser error.
+
+How it's wired up:
+
+- `pwa` is in `INSTALLED_APPS`, and the `PWA_APP_*` settings in `settings.py`
+  describe the app (name, colours, icons)
+- `path('', include('pwa.urls'))` in `hangarin/urls.py` serves `/manifest.json`
+  and `/serviceworker.js`
+- `{% progressive_web_app_meta %}` sits in the `<head>` of `base.html` and `base_auth.html`
+- `static/js/serviceworker.js` keeps the CSS, JS and icons, and shows `/offline/`
+  when a page can't be loaded
+- `static/js/pwa.js` registers the service worker and runs the **Install Hangarin**
+  button in the sidebar. It's a separate file because the site's
+  Content-Security-Policy doesn't allow inline scripts.
+
+Good to know:
+
+- Pages with your tasks are **not** cached. They're private and change all
+  the time, and a saved copy would still be there after logging out on a
+  shared computer. Offline you see the offline page, not old data.
+- It needs `https://` or `localhost`. PythonAnywhere is https already.
+- Changed a CSS or JS file and the old one still shows? Bump `VERSION` at the top
+  of `serviceworker.js`.
+- The icons are in `static/img/` (192, 512 and 180 px). Swap in your own
+  files with the same names if you want a different look.
+
+To try it: run the site, open it in Chrome, then **DevTools → Application**.
+*Manifest* shows the name and icons and *Service Workers* shows the worker as
+activated. Stop `runserver` and reload to see the offline page. To install,
+use the icon at the right end of the address bar or the button in the
+sidebar. On iPhone: Share → Add to Home Screen.
 
 ---
 
@@ -209,11 +271,12 @@ so secrets, your local data and uploaded pictures never get committed.
    - `/static/` -> `/home/yourusername/Hangarin/staticfiles`
    - `/media/` -> `/home/yourusername/Hangarin/media` (profile pictures)
 7. Social login only: add your domain under **Sites** in the admin, and
-   register the callback URLs listed in `.env.example` with each provider.
+   register the callback URLs listed in `.env.example` with each provider
+   (for GitHub, see the section above).
 8. Hit **Reload**.
 
-When you push new code: `git pull`, run `migrate` and `collectstatic` if
-something changed, then reload.
+When you push new code: `git pull`, then `pip install -r requirements.txt`,
+`migrate` and `collectstatic` if something changed, then reload.
 
 ---
 

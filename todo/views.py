@@ -892,6 +892,17 @@ def set_theme(request):
 
 
 # ----------------------------------------------------------------
+# Offline page (the service worker falls back to this)
+# ----------------------------------------------------------------
+
+def offline_page(request):
+    # Plain on purpose: no messages, no csrf token, nothing about the user.
+    # The service worker keeps a copy in the browser, and pulling it in must
+    # not use up someone's pending "saved" message either.
+    return _plain_page("offline.html", 200)
+
+
+# ----------------------------------------------------------------
 # Error pages
 # ----------------------------------------------------------------
 

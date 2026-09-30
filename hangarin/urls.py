@@ -8,6 +8,12 @@ from todo import views
 urlpatterns = [
     path(settings.ADMIN_URL, admin.site.urls),
     path('accounts/', include('allauth.urls')),
+
+    # PWA. Our own /offline/ comes first so it wins over the one that ships
+    # with django-pwa; the rest (manifest.json, serviceworker.js) is theirs.
+    path('offline/', views.offline_page, name='offline-page'),
+    path('', include('pwa.urls')),
+
     path('', views.HomePageView.as_view(), name='home'),
 
     # Profile

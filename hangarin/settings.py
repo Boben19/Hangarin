@@ -93,6 +93,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
 
     'todo.apps.TodoConfig',
+    'pwa',
 
     'allauth',
     'allauth.account',
@@ -271,6 +272,36 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 3 * 1024 * 1024
 FILE_UPLOAD_MAX_MEMORY_SIZE = 3 * 1024 * 1024
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# ----------------------------------------------------------------
+# Installable app (django-pwa)
+# ----------------------------------------------------------------
+# django-pwa builds /manifest.json from these and serves the service worker
+# from /serviceworker.js. Colours match the sidebar (#14342a) and the page
+# background (#eefaf3) in style.css.
+
+PWA_APP_NAME = 'Hangarin'
+PWA_APP_DESCRIPTION = 'Tasks, subtasks and notes, with streaks and levels to keep you going.'
+PWA_APP_THEME_COLOR = '#14342a'
+PWA_APP_BACKGROUND_COLOR = '#eefaf3'
+PWA_APP_DISPLAY = 'standalone'
+PWA_APP_SCOPE = '/'
+# 'any' instead of 'portrait' because the layout has a sidebar and people
+# will open it on tablets and laptops too.
+PWA_APP_ORIENTATION = 'any'
+PWA_APP_START_URL = '/'
+PWA_APP_STATUS_BAR_COLOR = 'default'
+PWA_APP_ICONS = [
+    {'src': STATIC_URL + 'img/icon-192.png', 'sizes': '192x192'},
+    {'src': STATIC_URL + 'img/icon-512.png', 'sizes': '512x512'},
+]
+PWA_APP_ICONS_APPLE = [
+    {'src': STATIC_URL + 'img/apple-touch-icon.png', 'sizes': '180x180'},
+]
+PWA_APP_DIR = 'ltr'
+PWA_APP_LANG = 'en-US'
+PWA_SERVICE_WORKER_PATH = os.path.join(BASE_DIR, 'static', 'js', 'serviceworker.js')
 
 
 # ----------------------------------------------------------------

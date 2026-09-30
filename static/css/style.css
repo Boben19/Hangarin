@@ -319,6 +319,23 @@ kbd {
 }
 .side-logout:hover { text-decoration: underline; }
 
+/* "Install Hangarin", only shown when the browser says it can be installed */
+.side-install {
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+    padding: 7px 12px;
+    background: transparent;
+    border: 1px solid rgba(143, 227, 171, 0.45);
+    border-radius: var(--radius-pill);
+    font: inherit;
+    font-size: 0.82rem;
+    color: var(--sprout);
+    cursor: pointer;
+}
+.side-install[hidden] { display: none; }
+.side-install:hover { background: rgba(143, 227, 171, 0.12); }
+
 .side-admin {
     color: var(--sprout);
     text-decoration: none;
@@ -1356,7 +1373,8 @@ button.badge.status-toggle:active { transform: scale(0.94); }
 }
 .btn-google .social-ico { background: #ea4335; }
 .btn-facebook .social-ico { background: #1877f2; }
-.btn-github .social-ico { background: #24292f; font-size: 0.6rem; }
+.btn-github .social-ico { background: #24292f; }
+.btn-github .social-ico svg { display: block; }
 .btn-google:hover { border-color: #ea4335; }
 .btn-facebook:hover { border-color: #1877f2; }
 .btn-github:hover { border-color: #24292f; }

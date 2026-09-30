@@ -15,9 +15,17 @@ class LoginRequiredMiddleware:
             settings.STATIC_URL,
             settings.MEDIA_URL,
         )
+        # The browser asks for these on its own, and the manifest request
+        # goes out without cookies. If they redirected to the login page the
+        # app could never be installed. None of them hold anything personal.
+        self.open_paths = ("/manifest.json", "/serviceworker.js", "/offline/")
 
     def __call__(self, request):
-        if request.path.startswith(self.open_prefixes) or request.user.is_authenticated:
+        if (
+            request.path.startswith(self.open_prefixes)
+            or request.path in self.open_paths
+            or request.user.is_authenticated
+        ):
             return self.get_response(request)
         # keeps the query string and encodes it properly
         return redirect_to_login(request.get_full_path(), settings.LOGIN_URL)
