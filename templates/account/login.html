@@ -1,6 +1,6 @@
 {% extends "base_auth.html" %}
 
-{% block title %}Log in — Hangarin{% endblock %}
+{% block title %}Log in | Hangarin{% endblock %}
 
 {% block auth_content %}
 <div class="auth-card">
@@ -12,7 +12,6 @@
 
     {% include "account/_social_buttons.html" %}
 
-    <div class="auth-divider"><span>or use your username</span></div>
 
     <form method="post" action="{% url 'account_login' %}" class="auth-form" novalidate>
         {% csrf_token %}

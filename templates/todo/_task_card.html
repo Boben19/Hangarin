@@ -1,0 +1,41 @@
+<article class="task-card status-{{ task.status|slugify }}{% if task.is_overdue %} is-overdue{% endif %}" data-glow>
+    <div class="task-card-top">
+        <button type="button"
+                class="status-toggle badge badge-{{ task.status|slugify }}"
+                data-toggle-url="{% url 'task-toggle-status' task.pk %}"
+                title="Click to move to the next status">
+            {{ task.status }}
+        </button>
+        <span class="task-card-tags">
+            {% if task.is_overdue %}<span class="chip chip-late">Overdue</span>{% endif %}
+            {% if task.priority %}<span class="chip chip-priority">{{ task.priority.name }}</span>{% endif %}
+        </span>
+    </div>
+    <a href="{% url 'task-detail' task.pk %}" class="task-title-link">
+        <h3 class="task-title">{{ task.title }}</h3>
+    </a>
+    {% if task.description %}<p class="task-desc">{{ task.description|truncatewords:20 }}</p>{% endif %}
+
+    {% if task.n_sub %}
+    <div class="task-progress" data-progress-for="{{ task.pk }}">
+        <div class="bar bar-thin" role="progressbar"
+             aria-valuenow="{% widthratio task.n_sub_done task.n_sub 100 %}" aria-valuemin="0" aria-valuemax="100">
+            <span class="bar-fill" style="--p: {% widthratio task.n_sub_done task.n_sub 100 %}%"></span>
+        </div>
+        <span class="task-progress-text"><span data-done>{{ task.n_sub_done }}</span>/<span data-total>{{ task.n_sub }}</span> steps</span>
+    </div>
+    {% endif %}
+
+    <div class="task-meta">
+        {% if task.category %}<span class="chip chip-category">{{ task.category.name }}</span>{% endif %}
+        {% if task.deadline %}<span class="task-deadline{% if task.is_overdue %} is-late{% endif %}">📅 {{ task.deadline|date:"M j, Y, g:i A" }}</span>{% endif %}
+    </div>
+    <div class="task-foot">
+        <span>{{ task.n_sub }} subtask{{ task.n_sub|pluralize }}</span>
+        <span>{{ task.n_notes }} note{{ task.n_notes|pluralize }}</span>
+        <span class="row-actions task-card-actions">
+            <a href="{% url 'task-update' task.pk %}" title="Edit" aria-label="Edit {{ task.title }}">✎</a>
+            <a href="{% url 'task-delete' task.pk %}" title="Delete" aria-label="Delete {{ task.title }}">🗑</a>
+        </span>
+    </div>
+</article>

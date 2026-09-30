@@ -1,27 +1,34 @@
 {% extends "base.html" %}
 
-{% block title %}Hangarin — Home{% endblock %}
+{% block title %}Hangarin | Home{% endblock %}
 
 {% block content %}
+{% with today=summary.today %}
 <section class="hero">
     <div class="hero-text">
-        <h1>Plant a task.<br>Watch it grow.</h1>
-        <p class="lead">
-            Hangarin keeps your day organized in one place: tasks, the smaller
-            steps inside them, notes you don't want to lose, and the
-            categories and priorities that keep everything sorted.
-        </p>
+        <p class="hero-kicker">{% now "l, F j" %}</p>
+        <h1>{{ greeting }}</h1>
+        <p class="lead">{{ hero_line }}</p>
         <div class="hero-actions">
             <a href="{% url 'task-list' %}" class="btn btn-primary">View my tasks</a>
             <a href="{% url 'task-create' %}" class="btn btn-outline">Add a task</a>
         </div>
     </div>
-    <div class="hero-art" aria-hidden="true">
-        <span class="leaf leaf-1">🌱</span>
-        <span class="leaf leaf-2">🍃</span>
-        <span class="leaf leaf-3">🌿</span>
+    <div class="hero-art">
+        <div class="ring ring-hero" style="--pct: {{ today.pct }}" role="img"
+             aria-label="{{ today.done }} of {{ today.goal }} done today">
+            <svg viewBox="0 0 120 120" aria-hidden="true">
+                <circle class="ring-track" cx="60" cy="60" r="54"></circle>
+                <circle class="ring-fill" cx="60" cy="60" r="54"></circle>
+            </svg>
+            <div class="ring-center">
+                <span class="ring-big">{{ today.done }}<small>/{{ today.goal }}</small></span>
+                <span class="ring-cap">today</span>
+            </div>
+        </div>
     </div>
 </section>
+{% endwith %}
 
 <section class="quick-add-section">
     <form method="post" action="{% url 'task-create' %}" class="quick-add-form">
@@ -29,29 +36,72 @@
         <input type="hidden" name="status" value="Pending">
         <input type="hidden" name="next" value="{% url 'home' %}">
         <span class="quick-add-icon">🌱</span>
-        <input type="text" name="title" class="quick-add-input" placeholder="Quick-add a task — press enter to plant it…" required autofocus>
+        <input type="text" name="title" class="quick-add-input" maxlength="255"
+               placeholder="Quick-add a task, press enter to plant it…" required
+               aria-label="Task title">
         <button type="submit" class="btn btn-primary btn-small">Add</button>
     </form>
 </section>
 
 <section class="stats">
     <div class="stat-card">
-        <span class="stat-number" data-count="{{ total_tasks }}">0</span>
+        <span class="stat-number" data-count="{{ summary.total }}">{{ summary.total }}</span>
         <span class="stat-label">Total tasks</span>
     </div>
     <div class="stat-card">
-        <span class="stat-number" data-count="{{ pending_tasks }}">0</span>
-        <span class="stat-label">Still pending</span>
+        <span class="stat-number" data-count="{{ summary.open }}">{{ summary.open }}</span>
+        <span class="stat-label">Still open</span>
     </div>
     <div class="stat-card">
-        <span class="stat-number" data-count="{{ completed_tasks }}">0</span>
+        <span class="stat-number" data-count="{{ summary.completed }}">{{ summary.completed }}</span>
         <span class="stat-label">Completed</span>
     </div>
-    <div class="stat-card">
-        <span class="stat-number" data-count="{{ total_categories }}">0</span>
-        <span class="stat-label">Categories</span>
+    <div class="stat-card stat-streak">
+        <span class="stat-number" data-count="{{ summary.streak }}">{{ summary.streak }}</span>
+        <span class="stat-label">Day streak {% if summary.streak %}🔥{% endif %}</span>
     </div>
 </section>
+
+<div class="home-columns">
+    <section class="upcoming">
+        <h2>Due soon</h2>
+        {% if upcoming_tasks %}
+        <div class="row-list">
+            {% for task in upcoming_tasks %}
+            <a href="{% url 'task-detail' task.pk %}" class="row-item row-item-link">
+                <span class="row-dot status-{{ task.status|slugify }}"></span>
+                <div class="row-main">
+                    <span class="row-title">{{ task.title }}</span>
+                    <span class="row-sub{% if task.is_overdue %} is-late{% endif %}">
+                        {% if task.is_overdue %}Overdue &middot; {% elif task.is_due_today %}Today &middot; {% endif %}{{ task.deadline|date:"M j, Y, g:i A" }}
+                    </span>
+                </div>
+                <span class="badge badge-{{ task.status|slugify }}">{{ task.status }}</span>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="mini-empty">
+            <p>Nothing with a deadline coming up. Add a date to a task and it will show here.</p>
+        </div>
+        {% endif %}
+    </section>
+
+    <aside class="level-card">
+        <div class="level-head">
+            <span class="level-badge">Lv {{ summary.level.level }}</span>
+            <div>
+                <h3>{{ summary.level.title }}</h3>
+                <p class="level-sub">{{ summary.level.xp }} XP</p>
+            </div>
+        </div>
+        <div class="bar" role="progressbar" aria-valuenow="{{ summary.level.pct }}" aria-valuemin="0" aria-valuemax="100">
+            <span class="bar-fill" style="--p: {{ summary.level.pct }}%"></span>
+        </div>
+        <p class="level-sub">{{ summary.level.to_next }} XP to the next level</p>
+        <a href="{% url 'profile' %}" class="btn btn-outline-green btn-small level-link">See my progress</a>
+    </aside>
+</div>
 
 <section class="quick-grid">
     <a href="{% url 'task-list' %}" class="quick-card">
@@ -68,29 +118,15 @@
     </a>
     <a href="{% url 'category-list' %}" class="quick-card">
         <h3>Categories</h3>
-        <p>Work, school, personal — however you like to split things up.</p>
+        <p>Work, school, personal, or whatever else you need to keep apart.</p>
     </a>
     <a href="{% url 'priority-list' %}" class="quick-card">
         <h3>Priorities</h3>
         <p>From critical to optional, so you know what to open first.</p>
     </a>
+    <a href="{% url 'profile' %}" class="quick-card">
+        <h3>My progress</h3>
+        <p>Your streak, weekly chart, level and badges.</p>
+    </a>
 </section>
-
-{% if upcoming_tasks %}
-<section class="upcoming">
-    <h2>Due soon</h2>
-    <div class="row-list">
-        {% for task in upcoming_tasks %}
-        <a href="{% url 'task-detail' task.pk %}" class="row-item row-item-link">
-            <span class="row-dot status-{{ task.status|slugify }}"></span>
-            <div class="row-main">
-                <span class="row-title">{{ task.title }}</span>
-                <span class="row-sub">{{ task.deadline|date:"M j, Y — g:i A" }}</span>
-            </div>
-            <span class="badge badge-{{ task.status|slugify }}">{{ task.status }}</span>
-        </a>
-        {% endfor %}
-    </div>
-</section>
-{% endif %}
 {% endblock %}

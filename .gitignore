@@ -1,14 +1,17 @@
+# virtual environments (any name)
 venv/
 env/
-.venv/
-__pycache__/
-*.pyc
-db.sqlite3
-staticfiles/
-.DS_Store
-*.log
-.env
+.venv*/
 
-.venv/
+# python
 __pycache__/
 *.pyc
+
+# local only
+.env
+db.sqlite3
+media/
+staticfiles/
+*.log
+.DS_Store
+node_modules/

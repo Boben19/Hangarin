@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+
+{% block title %}My progress | Hangarin{% endblock %}
+
+{% block content %}
+{% with user_obj=profile.user %}
+<section class="profile-head">
+    <div class="profile-id">
+        {% include "todo/_avatar.html" with p=profile size="xl" %}
+        <div class="profile-id-text">
+            <h1>{{ profile.display_name }}</h1>
+            <p class="profile-handle">@{{ user_obj.get_username }} &middot; growing since {{ user_obj.date_joined|date:"F Y" }}</p>
+            {% if profile.bio %}<p class="profile-bio">{{ profile.bio }}</p>{% endif %}
+        </div>
+    </div>
+    <div class="profile-head-actions">
+        <a href="{% url 'profile-edit' %}" class="btn btn-primary btn-small">Edit profile</a>
+    </div>
+</section>
+{% endwith %}
+
+<section class="level-strip" data-glow>
+    <div class="level-strip-main">
+        <span class="level-badge level-badge-lg">Lv {{ summary.level.level }}</span>
+        <div class="level-strip-text">
+            <h2>{{ summary.level.title }}</h2>
+            <p class="level-sub">{{ summary.level.xp }} XP &middot; {{ summary.level.to_next }} to the next level</p>
+        </div>
+    </div>
+    <div class="bar bar-lg" role="progressbar" aria-valuenow="{{ summary.level.pct }}" aria-valuemin="0" aria-valuemax="100">
+        <span class="bar-fill" style="--p: {{ summary.level.pct }}%"></span>
+    </div>
+    <p class="xp-note">Tasks are worth 10 XP, subtasks 3, and notes 1 (up to 30 from notes).</p>
+</section>
+
+<section class="stats profile-stats">
+    <div class="stat-card">
+        <span class="stat-number"><span data-count="{{ summary.completion_rate }}">{{ summary.completion_rate }}</span>%</span>
+        <span class="stat-label">Completion rate</span>
+        <span class="stat-foot">{{ summary.completed }} of {{ summary.total }} tasks</span>
+    </div>
+    <div class="stat-card stat-streak">
+        <span class="stat-number" data-count="{{ summary.streak }}">{{ summary.streak }}</span>
+        <span class="stat-label">Day streak {% if summary.streak %}🔥{% endif %}</span>
+        <span class="stat-foot">Best: {{ summary.best_streak }} day{{ summary.best_streak|pluralize }}</span>
+    </div>
+    <div class="stat-card">
+        <span class="stat-number" data-count="{{ summary.this_week }}">{{ summary.this_week }}</span>
+        <span class="stat-label">Done in the last 7 days</span>
+        <span class="stat-foot">
+            {% if summary.week_delta > 0 %}<span class="delta-up">↑ {{ summary.week_delta }}</span> vs the week before
+            {% elif summary.week_delta < 0 %}<span class="delta-down">↓ {{ summary.week_delta|cut:"-" }}</span> vs the week before
+            {% else %}Same as the week before{% endif %}
+        </span>
+    </div>
+    <div class="stat-card {% if summary.overdue %}stat-warn{% endif %}">
+        <span class="stat-number" data-count="{{ summary.overdue }}">{{ summary.overdue }}</span>
+        <span class="stat-label">Overdue</span>
+        <span class="stat-foot">
+            {% if summary.overdue %}<a href="{% url 'task-list' %}?due=overdue">Take a look</a>{% else %}Nothing running late{% endif %}
+        </span>
+    </div>
+</section>
+
+<div class="profile-grid">
+    <section class="panel" data-glow>
+        <div class="panel-head">
+            <h2>Last 7 days</h2>
+            <span class="panel-sub">tasks and subtasks finished</span>
+        </div>
+        <div class="week-chart" role="img" aria-label="Bar chart of things finished each day this week">
+            {% for day in summary.week %}
+            <div class="week-col{% if day.is_today %} is-today{% endif %}">
+                <span class="week-count">{{ day.count }}</span>
+                <div class="week-bar-wrap">
+                    <span class="week-bar{% if day.count == 0 %} is-empty{% endif %}" style="--h: {{ day.height }}%; --i: {{ forloop.counter0 }}"></span>
+                </div>
+                <span class="week-label">{% if day.is_today %}Today{% else %}{{ day.label }}{% endif %}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="panel" data-glow>
+        <div class="panel-head">
+            <h2>Today</h2>
+            <span class="panel-sub">daily goal: {{ summary.today.goal }}</span>
+        </div>
+        <div class="today-panel">
+            <div class="ring" style="--pct: {{ summary.today.pct }}" role="img"
+                 aria-label="{{ summary.today.done }} of {{ summary.today.goal }} done today">
+                <svg viewBox="0 0 120 120" aria-hidden="true">
+                    <circle class="ring-track" cx="60" cy="60" r="54"></circle>
+                    <circle class="ring-fill" cx="60" cy="60" r="54"></circle>
+                </svg>
+                <div class="ring-center">
+                    <span class="ring-big">{{ summary.today.done }}<small>/{{ summary.today.goal }}</small></span>
+                </div>
+            </div>
+            <p class="today-text">
+                {% if summary.today.hit %}Goal reached. Anything else today is a bonus.
+                {% elif summary.today.done %}{{ summary.today.left }} more and you've hit today's goal.
+                {% else %}Nothing finished yet today. One small step counts.{% endif %}
+            </p>
+            <a href="{% url 'profile-edit' %}" class="text-link">Change my goal</a>
+        </div>
+    </section>
+</div>
+
+<div class="profile-grid">
+    <section class="panel" data-glow>
+        <div class="panel-head">
+            <h2>Where your tasks live</h2>
+            <span class="panel-sub">by category</span>
+        </div>
+        {% if summary.breakdown %}
+        <ul class="breakdown">
+            {% for row in summary.breakdown %}
+            <li>
+                <div class="breakdown-top">
+                    <span>{{ row.name }}</span>
+                    <span class="breakdown-num">{{ row.done }}/{{ row.n }} done</span>
+                </div>
+                <div class="bar bar-thin"><span class="bar-fill" style="--p: {{ row.pct }}%"></span></div>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="detail-empty">Add a few tasks and this fills in.</p>
+        {% endif %}
+    </section>
+
+    <section class="panel" data-glow>
+        <div class="panel-head">
+            <h2>Recent wins</h2>
+            <span class="panel-sub">latest things you finished</span>
+        </div>
+        {% if summary.recent %}
+        <ul class="wins">
+            {% for item in summary.recent %}
+            <li>
+                <span class="win-mark">{% if item.kind == "task" %}✓{% else %}↳{% endif %}</span>
+                <a href="{% url 'task-detail' item.pk %}" class="win-title">{{ item.title }}</a>
+                <span class="win-when">{{ item.when|date:"M j" }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="detail-empty">Finish something and it shows up here.</p>
+        {% endif %}
+    </section>
+</div>
+
+<section class="panel panel-wide" data-glow>
+    <div class="panel-head">
+        <h2>Your last 12 weeks</h2>
+        <span class="panel-sub">{{ summary.active_days }} active day{{ summary.active_days|pluralize }}</span>
+    </div>
+    <div class="heat-scroll">
+        <div class="heat" role="img" aria-label="Activity grid for the last 12 weeks, darker squares mean more things finished">
+            {% for col in summary.heatmap %}
+            <div class="heat-col">
+                <span class="heat-month">{{ col.label }}</span>
+                {% for cell in col.cells %}<span class="heat-cell heat-{{ cell.level }}{% if cell.future %} is-future{% endif %}" style="--i: {{ forloop.parentloop.counter0 }}" title="{{ cell.date|date:'M j' }}: {{ cell.count }} finished"></span>{% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="heat-foot">
+        <p class="heat-note">
+            {% if summary.best_weekday %}You finish the most on <strong>{{ summary.best_weekday.name }}s</strong>.{% else %}Finish a task and your grid starts filling in.{% endif %}
+            {{ summary.total_finished }} thing{{ summary.total_finished|pluralize }} finished so far.
+        </p>
+        <span class="heat-legend" aria-hidden="true">Less
+            <span class="heat-cell heat-0"></span><span class="heat-cell heat-1"></span><span class="heat-cell heat-2"></span><span class="heat-cell heat-3"></span><span class="heat-cell heat-4"></span>
+        More</span>
+    </div>
+</section>
+
+<section class="panel panel-wide">
+    <div class="panel-head">
+        <h2>Badges</h2>
+        <span class="panel-sub">{{ summary.badges_earned }} of {{ summary.badges|length }} earned</span>
+    </div>
+    <div class="badge-grid">
+        {% for b in summary.badges %}
+        <div class="award{% if b.earned %} is-earned{% endif %}" title="{{ b.hint }}">
+            <span class="award-emoji" aria-hidden="true">{{ b.emoji }}</span>
+            <span class="award-name">{{ b.name }}</span>
+            <span class="award-hint">{{ b.hint }}</span>
+            {% if b.earned %}
+                <span class="award-status">Earned</span>
+            {% else %}
+                <div class="bar bar-thin"><span class="bar-fill" style="--p: {{ b.pct }}%"></span></div>
+                <span class="award-status">{{ b.have }}/{{ b.need }}</span>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="panel panel-wide account-panel">
+    <div class="panel-head">
+        <h2>Account</h2>
+    </div>
+    <div class="account-links">
+        <a href="{% url 'account_email' %}" class="account-link">Email addresses</a>
+        <a href="{% url 'account_change_password' %}" class="account-link">Change password</a>
+        <a href="{% url 'task-export' %}" class="account-link">Download my tasks (CSV)</a>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,8 @@
+{% comment %}
+allauth builds every page it ships (password reset, email addresses, change
+password, and so on) on top of this layout. Pointing it at our own base means
+all of those pages pick up the Hangarin look without a template each.
+{% endcomment %}
+{% extends "base.html" %}
+{% block title %}{% block head_title %}{% endblock %} | Hangarin{% endblock %}
+{% block body_class %}ax{% endblock %}

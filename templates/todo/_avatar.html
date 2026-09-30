@@ -1,0 +1,2 @@
+{% comment %}Usage: include "todo/_avatar.html" with p=profile size="lg"{% endcomment %}
+{% if p.avatar %}<img class="avatar avatar-{{ size|default:'md' }}" src="{{ p.avatar.url }}" alt="">{% else %}<span class="avatar avatar-{{ size|default:'md' }} avatar-fallback" aria-hidden="true">{{ p.initial }}</span>{% endif %}

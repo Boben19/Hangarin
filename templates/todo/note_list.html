@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Notes — Hangarin{% endblock %}
+{% block title %}Notes | Hangarin{% endblock %}
 
 {% block content %}
 <div class="page-head">
@@ -12,8 +12,8 @@
 </div>
 
 <form class="toolbar" method="get">
-    <input type="search" name="q" value="{{ query }}" placeholder="Search note content or task…" class="toolbar-search">
-    <select name="sort_by" class="toolbar-sort" onchange="this.form.submit()">
+    <input type="search" name="q" value="{{ query }}" placeholder="Search note content or task…" class="toolbar-search" aria-label="Search notes" data-search>
+    <select name="sort_by" class="toolbar-sort" data-autosubmit aria-label="Sort by">
         <option value="-created_at" {% if sort_by == "-created_at" or not sort_by %}selected{% endif %}>Newest first</option>
         <option value="created_at" {% if sort_by == "created_at" %}selected{% endif %}>Oldest first</option>
         <option value="task__title" {% if sort_by == "task__title" %}selected{% endif %}>Task</option>
@@ -25,14 +25,14 @@
 {% if notes %}
 <div class="note-grid">
     {% for note in notes %}
-    <article class="note-card">
+    <article class="note-card" data-glow>
         <a href="{% url 'task-detail' note.task_id %}" class="note-task">{{ note.task.title }}</a>
         <p class="note-content">{{ note.content|truncatewords:28 }}</p>
         <div class="note-row-foot">
-            <span class="note-date">{{ note.created_at|date:"M j, Y — g:i A" }}</span>
+            <span class="note-date">{{ note.created_at|date:"M j, Y, g:i A" }}</span>
             <span class="row-actions">
-                <a href="{% url 'note-update' note.pk %}" title="Edit">✎</a>
-                <a href="{% url 'note-delete' note.pk %}" title="Delete">🗑</a>
+                <a href="{% url 'note-update' note.pk %}" title="Edit" aria-label="Edit note">✎</a>
+                <a href="{% url 'note-delete' note.pk %}" title="Delete" aria-label="Delete note">🗑</a>
             </span>
         </div>
     </article>

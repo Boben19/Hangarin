@@ -1,12 +1,15 @@
 {% load socialaccount %}
+{% if social_providers %}
 <div class="social-buttons">
-    <a href="{% provider_login_url 'google' process='login' %}" class="btn btn-social btn-google">
-        <span class="social-ico">G</span> Continue with Google
-    </a>
-    <a href="{% provider_login_url 'facebook' process='login' %}" class="btn btn-social btn-facebook">
-        <span class="social-ico">f</span> Continue with Facebook
-    </a>
-    <a href="{% provider_login_url 'github' process='login' %}" class="btn btn-social btn-github">
-        <span class="social-ico">&#9679;</span> Continue with GitHub
-    </a>
+    {% for provider in social_providers %}
+    <form method="post" action="{% provider_login_url provider.id process='login' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-social btn-{{ provider.id }}">
+            <span class="social-ico">{% if provider.id == 'google' %}G{% elif provider.id == 'facebook' %}f{% else %}&#9679;{% endif %}</span>
+            Continue with {{ provider.name }}
+        </button>
+    </form>
+    {% endfor %}
 </div>
+<div class="auth-divider"><span>or use your account</span></div>
+{% endif %}

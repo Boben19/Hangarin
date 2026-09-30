@@ -44,6 +44,14 @@ class Command(BaseCommand):
             help="Who the generated tasks belong to. Defaults to the first superuser.",
         )
 
+    @staticmethod
+    def _shared(model, name):
+        """The shared default with this name, made if it isn't there yet.
+        Uses first() rather than get_or_create() so a duplicate someone added
+        by hand in the admin doesn't crash the command."""
+        found = model.objects.filter(name__iexact=name, owner__isnull=True).order_by("pk").first()
+        return found or model.objects.create(name=name, owner=None)
+
     def handle(self, *args, **options):
         User = get_user_model()
         if options["username"]:
@@ -55,17 +63,14 @@ class Command(BaseCommand):
             owner = User.objects.filter(is_superuser=True).order_by("id").first()
             if owner is None:
                 raise CommandError(
-                    "No user to own the fake data yet — sign up (or run "
+                    "No user to own the fake data yet. Sign up (or run "
                     "createsuperuser) and pass --username, then try again."
                 )
 
         self.stdout.write("Setting up priorities and categories...")
-        priorities = [
-            Priority.objects.get_or_create(name=name)[0] for name in PRIORITY_NAMES
-        ]
-        categories = [
-            Category.objects.get_or_create(name=name)[0] for name in CATEGORY_NAMES
-        ]
+        # owner=None makes these the shared defaults everybody can pick from
+        priorities = [self._shared(Priority, name) for name in PRIORITY_NAMES]
+        categories = [self._shared(Category, name) for name in CATEGORY_NAMES]
 
         task_count = options["tasks"]
         subtasks_per_task = options["subtasks_per_task"]

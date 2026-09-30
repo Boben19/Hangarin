@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Delete account | Hangarin{% endblock %}
+
+{% block content %}
+<a href="{% url 'profile-edit' %}" class="back-link">&larr; Edit profile</a>
+
+<div class="form-page">
+    <div class="form-card form-card-danger">
+        <div class="form-card-head">
+            <h1>Delete your account</h1>
+            <a href="{% url 'profile-edit' %}" class="form-close" aria-label="Close">&times;</a>
+        </div>
+
+        <p class="confirm-copy">
+            This removes your account for good, along with
+            {{ n_tasks }} task{{ n_tasks|pluralize }},
+            {{ n_subtasks }} subtask{{ n_subtasks|pluralize }},
+            {{ n_notes }} note{{ n_notes|pluralize }}, your own categories and priorities,
+            and your profile picture. There is no way to get it back.
+        </p>
+        <p class="confirm-copy">
+            Want a copy first? <a href="{% url 'task-export' %}" class="text-link">Download your tasks as a CSV</a>.
+        </p>
+
+        <form method="post" class="stack-form" novalidate>
+            {% csrf_token %}
+            <div class="field{% if form.confirm.errors %} has-error{% endif %}">
+                <label for="{{ form.confirm.id_for_label }}">{{ form.confirm.label }}</label>
+                {{ form.confirm }}
+                {% for error in form.confirm.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+            </div>
+            <div class="form-actions">
+                <a href="{% url 'profile-edit' %}" class="btn btn-outline-green btn-small">Keep my account</a>
+                <button type="submit" class="btn btn-danger btn-small">Delete everything</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

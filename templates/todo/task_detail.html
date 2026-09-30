@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 
-{% block title %}{{ task.title }} — Hangarin{% endblock %}
+{% block title %}{{ task.title }} | Hangarin{% endblock %}
 
 {% block content %}
 <a href="{% url 'task-list' %}" class="back-link">&larr; All tasks</a>
 
-<div class="detail-head status-{{ task.status|slugify }}">
+<div class="detail-head status-{{ task.status|slugify }}{% if task.is_overdue %} is-overdue{% endif %}">
     <div class="detail-head-top">
         <button type="button"
                 class="status-toggle badge badge-{{ task.status|slugify }}"
@@ -13,6 +13,7 @@
                 title="Click to move this task to the next status">
             {{ task.status }}
         </button>
+        {% if task.is_overdue %}<span class="chip chip-late">Overdue</span>{% endif %}
         {% if task.priority %}<span class="chip chip-priority">{{ task.priority.name }}</span>{% endif %}
         {% if task.category %}<span class="chip chip-category">{{ task.category.name }}</span>{% endif %}
     </div>
@@ -25,9 +26,12 @@
 
     <div class="detail-meta-row">
         {% if task.deadline %}
-            <span class="task-deadline">📅 Due {{ task.deadline|date:"M j, Y — g:i A" }}</span>
+            <span class="task-deadline{% if task.is_overdue %} is-late{% endif %}">📅 Due {{ task.deadline|date:"M j, Y, g:i A" }}</span>
         {% endif %}
         <span class="task-deadline">🕐 Added {{ task.created_at|date:"M j, Y" }}</span>
+        {% if task.completed_at %}
+            <span class="task-deadline">✅ Finished {{ task.completed_at|date:"M j, Y" }}</span>
+        {% endif %}
     </div>
 
     <div class="detail-actions">
@@ -40,14 +44,22 @@
     <section class="detail-col">
         <div class="detail-col-head">
             <h2>Subtasks</h2>
-            <span class="detail-col-count">{{ subtasks.count }}</span>
+            <span class="detail-col-count" data-progress-for="{{ task.pk }}">
+                <span data-done>{{ subtasks_done }}</span>/<span data-total>{{ subtask_count }}</span> done
+            </span>
         </div>
+
+        {% if subtask_count %}
+        <div class="bar bar-thin detail-bar" role="progressbar" aria-valuenow="{{ subtask_pct }}" aria-valuemin="0" aria-valuemax="100" data-progress-bar="{{ task.pk }}">
+            <span class="bar-fill" style="--p: {{ subtask_pct }}%"></span>
+        </div>
+        {% endif %}
 
         <form method="post" action="{% url 'subtask-create' %}?task={{ task.pk }}" class="inline-add-form">
             {% csrf_token %}
             {{ subtask_form.parent_task }}
             {{ subtask_form.status }}
-            <input type="text" name="title" placeholder="Add a subtask and press enter…" class="field-input" required>
+            <input type="text" name="title" placeholder="Add a subtask and press enter…" class="field-input" maxlength="255" required aria-label="New subtask">
             <button type="submit" class="btn btn-primary btn-small">Add</button>
         </form>
 
@@ -56,35 +68,37 @@
             {% for subtask in subtasks %}
             <li class="subtask-row">
                 <button type="button"
-                        class="subtask-check status-{{ subtask.status|slugify }}"
+                        class="subtask-check status-toggle status-{{ subtask.status|slugify }}"
                         data-toggle-url="{% url 'subtask-toggle-status' subtask.pk %}"
+                        data-parent="{{ task.pk }}"
+                        aria-label="Change status of {{ subtask.title }}"
                         title="Click to move to the next status">
                     {% if subtask.status == "Completed" %}✓{% endif %}
                 </button>
                 <span class="subtask-title">{{ subtask.title }}</span>
                 <span class="badge badge-{{ subtask.status|slugify }} subtask-badge">{{ subtask.status }}</span>
                 <span class="row-actions">
-                    <a href="{% url 'subtask-update' subtask.pk %}" title="Edit">✎</a>
-                    <a href="{% url 'subtask-delete' subtask.pk %}" title="Delete">🗑</a>
+                    <a href="{% url 'subtask-update' subtask.pk %}" title="Edit" aria-label="Edit {{ subtask.title }}">✎</a>
+                    <a href="{% url 'subtask-delete' subtask.pk %}" title="Delete" aria-label="Delete {{ subtask.title }}">🗑</a>
                 </span>
             </li>
             {% endfor %}
         </ul>
         {% else %}
-        <p class="detail-empty">No subtasks yet — break this down into smaller steps above.</p>
+        <p class="detail-empty">No subtasks yet. Break this down into smaller steps above.</p>
         {% endif %}
     </section>
 
     <section class="detail-col">
         <div class="detail-col-head">
             <h2>Notes</h2>
-            <span class="detail-col-count">{{ notes.count }}</span>
+            <span class="detail-col-count">{{ notes|length }}</span>
         </div>
 
         <form method="post" action="{% url 'note-create' %}?task={{ task.pk }}" class="inline-add-form inline-add-form-stack">
             {% csrf_token %}
             {{ note_form.task }}
-            <textarea name="content" rows="2" placeholder="Jot something down…" class="field-input field-textarea" required></textarea>
+            <textarea name="content" rows="2" placeholder="Jot something down…" class="field-input field-textarea" required aria-label="New note"></textarea>
             <button type="submit" class="btn btn-primary btn-small">Add note</button>
         </form>
 
@@ -94,10 +108,10 @@
             <li class="note-row">
                 <p>{{ note.content|linebreaksbr }}</p>
                 <div class="note-row-foot">
-                    <span class="note-date">{{ note.created_at|date:"M j, Y — g:i A" }}</span>
+                    <span class="note-date">{{ note.created_at|date:"M j, Y, g:i A" }}</span>
                     <span class="row-actions">
-                        <a href="{% url 'note-update' note.pk %}" title="Edit">✎</a>
-                        <a href="{% url 'note-delete' note.pk %}" title="Delete">🗑</a>
+                        <a href="{% url 'note-update' note.pk %}" title="Edit" aria-label="Edit note">✎</a>
+                        <a href="{% url 'note-delete' note.pk %}" title="Delete" aria-label="Delete note">🗑</a>
                     </span>
                 </div>
             </li>

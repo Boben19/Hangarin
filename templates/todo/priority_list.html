@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Priorities — Hangarin{% endblock %}
+{% block title %}Priorities | Hangarin{% endblock %}
 
 {% block content %}
 <div class="page-head">
@@ -12,9 +12,9 @@
 </div>
 
 <form class="toolbar" method="get">
-    <input type="search" name="q" value="{{ query }}" placeholder="Search priorities…" class="toolbar-search">
-    <select name="sort_by" class="toolbar-sort" onchange="this.form.submit()">
-        <option value="name" {% if sort_by == "name" or not sort_by %}selected{% endif %}>A–Z</option>
+    <input type="search" name="q" value="{{ query }}" placeholder="Search priorities…" class="toolbar-search" aria-label="Search priorities" data-search>
+    <select name="sort_by" class="toolbar-sort" data-autosubmit aria-label="Sort by">
+        <option value="name" {% if sort_by != "-name" %}selected{% endif %}>A–Z</option>
         <option value="-name" {% if sort_by == "-name" %}selected{% endif %}>Z–A</option>
     </select>
     <button type="submit" class="btn btn-outline-green btn-small">Search</button>
@@ -24,15 +24,19 @@
 {% if priorities %}
 <div class="tag-grid">
     {% for priority in priorities %}
-    <div class="tag-card">
+    <div class="tag-card" data-glow>
         <div class="tag-card-top">
             <span class="tag-name">{{ priority.name }}</span>
+            {% if priority.is_shared %}
+                <span class="chip chip-default" title="Shared with everyone. Only an admin can change it.">Default</span>
+            {% else %}
             <span class="row-actions">
-                <a href="{% url 'priority-update' priority.pk %}" title="Edit">✎</a>
-                <a href="{% url 'priority-delete' priority.pk %}" title="Delete">🗑</a>
+                <a href="{% url 'priority-update' priority.pk %}" title="Edit" aria-label="Edit {{ priority.name }}">✎</a>
+                <a href="{% url 'priority-delete' priority.pk %}" title="Delete" aria-label="Delete {{ priority.name }}">🗑</a>
             </span>
+            {% endif %}
         </div>
-        <span class="tag-count">{{ priority.tasks.count }} task{{ priority.tasks.count|pluralize }}</span>
+        <span class="tag-count">{{ priority.n_tasks }} of your task{{ priority.n_tasks|pluralize }}</span>
     </div>
     {% endfor %}
 </div>

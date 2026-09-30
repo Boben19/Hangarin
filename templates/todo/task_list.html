@@ -1,68 +1,71 @@
 {% extends "base.html" %}
 
-{% block title %}Tasks — Hangarin{% endblock %}
+{% block title %}Tasks | Hangarin{% endblock %}
 
 {% block content %}
 <div class="page-head">
     <div>
         <h1>Tasks</h1>
-        <p class="page-sub">{{ paginator.count }} task{{ paginator.count|pluralize }} on the list.</p>
+        <p class="page-sub">{{ paginator.count }} task{{ paginator.count|pluralize }}{% if is_filtered %} match{{ paginator.count|pluralize:"es," }} your filters{% else %} on the list{% endif %}.</p>
     </div>
-    <a href="{% url 'task-create' %}" class="btn btn-primary btn-small">+ New task</a>
+    <div class="page-head-actions">
+        <a href="{% url 'task-export' %}{% querystring page=None %}" class="btn btn-outline-green btn-small">Export CSV</a>
+        <a href="{% url 'task-create' %}" class="btn btn-primary btn-small">+ New task</a>
+    </div>
 </div>
 
+<nav class="filter-chips" aria-label="Filter by status">
+    <a href="{% querystring status=None due=None page=None %}" class="filter-chip {% if not status and not due %}is-on{% endif %}">All</a>
+    {% for value, label in status_choices %}
+    <a href="{% querystring status=value due=None page=None %}" class="filter-chip {% if status == value %}is-on{% endif %}">{{ label }}</a>
+    {% endfor %}
+    <a href="{% querystring status=None due='overdue' page=None %}" class="filter-chip filter-chip-late {% if due == 'overdue' %}is-on{% endif %}">Overdue</a>
+    <a href="{% querystring status=None due='today' page=None %}" class="filter-chip {% if due == 'today' %}is-on{% endif %}">Due today</a>
+    <a href="{% querystring status=None due='week' page=None %}" class="filter-chip {% if due == 'week' %}is-on{% endif %}">Next 7 days</a>
+</nav>
+
 <form class="toolbar" method="get">
-    <input type="search" name="q" value="{{ query }}" placeholder="Search title or description…" class="toolbar-search">
-    <select name="sort_by" class="toolbar-sort" onchange="this.form.submit()">
+    {% if status %}<input type="hidden" name="status" value="{{ status }}">{% endif %}
+    {% if due %}<input type="hidden" name="due" value="{{ due }}">{% endif %}
+    <input type="search" name="q" value="{{ query }}" placeholder="Search title or description…" class="toolbar-search" aria-label="Search tasks" data-search>
+    <select name="category" class="toolbar-sort" data-autosubmit aria-label="Category">
+        <option value="">All categories</option>
+        {% for c in categories %}<option value="{{ c.pk }}" {% if category_id == c.pk %}selected{% endif %}>{{ c.name }}</option>{% endfor %}
+    </select>
+    <select name="priority" class="toolbar-sort" data-autosubmit aria-label="Priority">
+        <option value="">All priorities</option>
+        {% for p in priorities %}<option value="{{ p.pk }}" {% if priority_id == p.pk %}selected{% endif %}>{{ p.name }}</option>{% endfor %}
+    </select>
+    <select name="sort_by" class="toolbar-sort" data-autosubmit aria-label="Sort by">
         <option value="" {% if not sort_by %}selected{% endif %}>Newest first</option>
         <option value="deadline" {% if sort_by == "deadline" %}selected{% endif %}>Deadline (soonest)</option>
         <option value="-deadline" {% if sort_by == "-deadline" %}selected{% endif %}>Deadline (latest)</option>
+        <option value="priority" {% if sort_by == "priority" %}selected{% endif %}>Most urgent first</option>
         <option value="title" {% if sort_by == "title" %}selected{% endif %}>Title (A–Z)</option>
         <option value="-title" {% if sort_by == "-title" %}selected{% endif %}>Title (Z–A)</option>
-        <option value="priority__name" {% if sort_by == "priority__name" %}selected{% endif %}>Priority</option>
-        <option value="category__name" {% if sort_by == "category__name" %}selected{% endif %}>Category</option>
+        <option value="category" {% if sort_by == "category" %}selected{% endif %}>Category</option>
     </select>
     <button type="submit" class="btn btn-outline-green btn-small">Search</button>
-    {% if query or sort_by %}<a href="{% url 'task-list' %}" class="toolbar-clear">Clear</a>{% endif %}
+    {% if is_filtered %}<a href="{% url 'task-list' %}" class="toolbar-clear">Clear all</a>{% endif %}
 </form>
 
 {% if tasks %}
 <div class="task-grid">
     {% for task in tasks %}
-    <article class="task-card status-{{ task.status|slugify }}">
-        <div class="task-card-top">
-            <button type="button"
-                    class="status-toggle badge badge-{{ task.status|slugify }}"
-                    data-toggle-url="{% url 'task-toggle-status' task.pk %}"
-                    title="Click to move to the next status">
-                {{ task.status }}
-            </button>
-            {% if task.priority %}<span class="chip chip-priority">{{ task.priority.name }}</span>{% endif %}
-        </div>
-        <a href="{% url 'task-detail' task.pk %}" class="task-title-link">
-            <h3 class="task-title">{{ task.title }}</h3>
-        </a>
-        {% if task.description %}<p class="task-desc">{{ task.description|truncatewords:20 }}</p>{% endif %}
-        <div class="task-meta">
-            {% if task.category %}<span class="chip chip-category">{{ task.category.name }}</span>{% endif %}
-            {% if task.deadline %}<span class="task-deadline">📅 {{ task.deadline|date:"M j, Y — g:i A" }}</span>{% endif %}
-        </div>
-        <div class="task-foot">
-            <span>{{ task.subtasks.count }} subtask{{ task.subtasks.count|pluralize }}</span>
-            <span>{{ task.notes.count }} note{{ task.notes.count|pluralize }}</span>
-            <span class="row-actions task-card-actions">
-                <a href="{% url 'task-update' task.pk %}" title="Edit">✎</a>
-                <a href="{% url 'task-delete' task.pk %}" title="Delete">🗑</a>
-            </span>
-        </div>
-    </article>
+        {% include "todo/_task_card.html" %}
     {% endfor %}
 </div>
 {% else %}
 <div class="empty-state">
     <span class="empty-leaf">🌱</span>
-    <h3>Nothing here yet</h3>
-    <p>{% if query %}No tasks match "{{ query }}".{% else %}Add your first task above to see it planted here.{% endif %}</p>
+    {% if is_filtered %}
+        <h3>Nothing matches</h3>
+        <p>Try loosening a filter, or <a href="{% url 'task-list' %}">clear them all</a>.</p>
+    {% else %}
+        <h3>Nothing here yet</h3>
+        <p>Add your first task and it will show up here.</p>
+        <a href="{% url 'task-create' %}" class="btn btn-primary btn-small empty-cta">+ New task</a>
+    {% endif %}
 </div>
 {% endif %}
 

@@ -1,15 +1,24 @@
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
 
 from todo import views
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path(settings.ADMIN_URL, admin.site.urls),
     path('accounts/', include('allauth.urls')),
     path('', views.HomePageView.as_view(), name='home'),
 
+    # Profile
+    path('profile/', views.ProfileView.as_view(), name='profile'),
+    path('profile/edit/', views.ProfileEditView.as_view(), name='profile-edit'),
+    path('profile/theme/', views.set_theme, name='set-theme'),
+    path('profile/delete/', views.AccountDeleteView.as_view(), name='account-delete'),
+
     # Tasks
     path('tasks/', views.TaskListView.as_view(), name='task-list'),
+    path('tasks/export/', views.export_tasks_csv, name='task-export'),
     path('tasks/new/', views.TaskCreateView.as_view(), name='task-create'),
     path('tasks/<int:pk>/', views.TaskDetailView.as_view(), name='task-detail'),
     path('tasks/<int:pk>/edit/', views.TaskUpdateView.as_view(), name='task-update'),
@@ -41,3 +50,13 @@ urlpatterns = [
     path('priorities/<int:pk>/edit/', views.PriorityUpdateView.as_view(), name='priority-update'),
     path('priorities/<int:pk>/delete/', views.PriorityDeleteView.as_view(), name='priority-delete'),
 ]
+
+# Friendly error pages (only used when DEBUG is off)
+handler404 = 'todo.views.not_found'
+handler403 = 'todo.views.forbidden'
+handler500 = 'todo.views.server_error'
+
+# Uploaded profile pictures. On the live site the web server handles /media/
+# (PythonAnywhere: Web tab -> Static files), so this only applies locally.
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

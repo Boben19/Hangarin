@@ -20,7 +20,8 @@
 Hangarin is a task and to-do manager built to keep daily work from slipping
 through the cracks. Tasks carry a deadline, a status, a priority, and a
 category, and each one can be broken down into subtasks and backed by notes —
-so the big picture and the small steps live in the same place.
+so the big picture and the small steps live in the same place. Each person
+also gets a progress page with streaks, levels, a weekly chart and badges.
 
 ---
 
@@ -67,21 +68,31 @@ by status; Notes by date; Categories and Priorities by name.
 
 ---
 
-## Login & accounts
+## Accounts, progress and profile
 
 Everything sits behind a login. You can sign up with a username and
-password, or use Google, Facebook or GitHub. Tasks (and their subtasks and
-notes) belong to the account that made them, so each person only sees
-their own list. Categories and priorities are shared.
+password, or with Google, Facebook or GitHub. Tasks (and their subtasks and
+notes) belong to the account that made them, so people only ever see their
+own list. Categories and priorities come as shared defaults, and anyone can
+add their own on top.
 
-To turn on the social buttons, copy `.env.example` to `.env`, fill in the
-client ID and secret for each provider, and register the callback URLs
-listed in that file. On PythonAnywhere, set the same variables in the WSGI
-file with `os.environ[...]` before the app loads. Also add your domain
-under Sites in `/admin/`.
+**My progress** (the profile page) shows:
 
-After pulling these changes run `python manage.py migrate`. Fake data for
-your own account: `python manage.py populate_data --username yourname`.
+- level and XP (tasks are worth 10, subtasks 3, notes 1 up to 30)
+- current and best streak, and how this week compares to last week
+- a 7 day bar chart and a 12 week activity grid, plus the weekday you finish the most on
+- a daily goal ring (you set the number in **Edit profile**)
+- completion by category, your recent wins, and badges to unlock
+
+**Edit profile** lets you change your name, username, picture (PNG, JPG or
+WebP, cropped square), a short bio, your daily goal and light/dark/device
+theme. From there you can also change your password, manage email addresses,
+download all your tasks as a CSV, or delete your account and everything in it.
+
+Small touches: confetti when you finish something (bigger for a level up or
+hitting your daily goal), a light/dark switch that follows you between
+devices, and keyboard shortcuts (`N` new task, `/` search, `?` for the list).
+Animations switch themselves off if your device asks for reduced motion.
 
 ---
 
@@ -91,93 +102,101 @@ your own account: `python manage.py populate_data --username yourname`.
 ### 1. Virtual environment
 
 ```bash
-cd hangarin
-python3 -m venv venv
+cd Hangarin
+python3 -m venv .venv
 
 # activate it
-source venv/bin/activate      # macOS/Linux
-venv\Scripts\activate         # Windows
+source .venv/bin/activate      # macOS/Linux
+.venv\Scripts\activate         # Windows
 
 pip install -r requirements.txt
 ```
 
-### 2. Database & migrations
+### 2. Settings file
 
 ```bash
-python manage.py makemigrations
+cp .env.example .env           # copy .env.example .env on Windows
+```
+
+Open `.env` and add a secret key. Generate one with:
+
+```bash
+python -c "from django.core.management.utils import get_random_secret_key as g; print(g())"
+```
+
+Paste only that output after `DJANGO_SECRET_KEY=`. For local work also add
+`DJANGO_DEBUG=True`. The site will not start on the live server with a
+missing, short or placeholder key, on purpose.
+
+### 3. Database
+
+```bash
 python manage.py migrate
 python manage.py createsuperuser
 ```
 
-### 3. Seed data
+### 4. Seed data (optional)
 
-Priorities and Categories are seeded manually (five of each), and Tasks,
-SubTasks, and Notes are generated with Faker — one command handles all of it:
-
-```bash
-python manage.py populate_data
-```
-
-Optional flags for more or less data:
+Priorities and categories are added as shared defaults, and Tasks, SubTasks
+and Notes are generated with Faker for one account:
 
 ```bash
-python manage.py populate_data --tasks 30 --subtasks-per-task 4 --notes-per-task 3
+python manage.py populate_data --username yourname
+python manage.py populate_data --username yourname --tasks 30 --subtasks-per-task 4 --notes-per-task 3
 ```
 
-### 4. Run it
+### 5. Run it
 
 ```bash
 python manage.py runserver
 ```
 
-- `http://127.0.0.1:8000/` — the landing page
-- `http://127.0.0.1:8000/admin/` — the dashboard, log in with the superuser you created
+- `http://127.0.0.1:8000/` is the app (sign up or log in first)
+- `http://127.0.0.1:8000/admin/` is the admin, use the superuser from step 3
 
 ---
 
 ## 🌱 Version Control
 
 ```bash
-git init
 git add .
-git commit -m "Initial commit: Hangarin task manager"
-git remote add origin <your-repo-url>
-git branch -M main
-git push -u origin main
+git commit -m "Describe what you changed"
+git push
 ```
 
-`db.sqlite3` and `venv/` are already in `.gitignore`, so your local database
-and virtual environment never get committed.
+`.env`, `db.sqlite3`, `media/` and any `.venv*` folder are in `.gitignore`,
+so secrets, your local data and uploaded pictures never get committed.
 
 ---
 
 ## ☁️ Deploying to PythonAnywhere
 
-1. Open a **Bash console** on PythonAnywhere and clone the repo:
+1. In a **Bash console**, get the code and make a virtualenv:
    ```bash
-   git clone <your-repo-url>
-   cd hangarin
-   ```
-2. Create a virtualenv and install dependencies:
-   ```bash
+   git clone <your-repo-url> Hangarin
+   cd Hangarin
    mkvirtualenv --python=/usr/bin/python3.11 hangarin-venv
    pip install -r requirements.txt
    ```
-3. Migrate and seed:
+2. Create the `.env` file on the server (`cp .env.example .env`, then edit it).
+   Set a **new** `DJANGO_SECRET_KEY` there, different from your laptop's.
+   Leave `DJANGO_DEBUG` out. If you use your own domain, set
+   `DJANGO_ALLOWED_HOSTS` and `DJANGO_CSRF_TRUSTED_ORIGINS` too.
+3. Set up the database and static files:
    ```bash
    python manage.py migrate
    python manage.py createsuperuser
-   python manage.py populate_data
+   python manage.py collectstatic
    ```
-4. On the **Web** tab, add a new web app with **Manual configuration**,
-   matching Python version, and set the virtualenv path, e.g.
-   `/home/yourusername/.virtualenvs/hangarin-venv`.
-5. Edit the **WSGI configuration file** to point at this project:
+4. On the **Web** tab, add a web app with **Manual configuration**, set the
+   virtualenv path (`/home/yourusername/.virtualenvs/hangarin-venv`) and the
+   source/working directory (`/home/yourusername/Hangarin`).
+5. In the WSGI file:
    ```python
    import os
    import sys
 
-   path = '/home/yourusername/hangarin'
+   path = '/home/yourusername/Hangarin'
    if path not in sys.path:
        sys.path.insert(0, path)
 
@@ -186,17 +205,34 @@ and virtual environment never get committed.
    from django.core.wsgi import get_wsgi_application
    application = get_wsgi_application()
    ```
-6. In `hangarin/settings.py`, set `ALLOWED_HOSTS = ['yourusername.pythonanywhere.com']`
-   and switch `DEBUG = False` once things are confirmed working.
-7. Map static URL `/static/` to `/home/yourusername/hangarin/staticfiles`,
-   then run:
-   ```bash
-   python manage.py collectstatic
-   ```
-8. Hit **Reload** and open your `.pythonanywhere.com` URL.
+6. Under **Static files** add two entries:
+   - `/static/` -> `/home/yourusername/Hangarin/staticfiles`
+   - `/media/` -> `/home/yourusername/Hangarin/media` (profile pictures)
+7. Social login only: add your domain under **Sites** in the admin, and
+   register the callback URLs listed in `.env.example` with each provider.
+8. Hit **Reload**.
 
-Whenever you push new commits, `git pull` on the console, re-run
-`migrate`/`collectstatic` if needed, and reload again.
+When you push new code: `git pull`, run `migrate` and `collectstatic` if
+something changed, then reload.
+
+---
+
+## 🔒 Security notes
+
+- Secrets live in `.env` only. Never zip or commit that file. If a key or
+  OAuth secret has ever been shared, rotate it.
+- Every list, detail, edit, delete and status change is filtered by owner
+  on the server, so guessing another person's URL gets a 404.
+- Logging out and social login are POST only. Session and CSRF cookies are
+  HttpOnly, and secure once `DJANGO_DEBUG` is off.
+- A Content-Security-Policy lets pages run only this site's own scripts.
+- Uploaded pictures are checked, re-encoded as WebP with metadata stripped,
+  and stored under a random name. Nothing the user uploads is served as-is.
+- CSV export defuses spreadsheet formulas.
+- Pages with personal data are sent as `private, no-cache`, so the Back
+  button after logging out on a shared computer doesn't reveal them.
+- Set the `EMAIL_*` values to send real mail. Once you do, new email
+  addresses have to be confirmed before they can be used to log in.
 
 ---
 

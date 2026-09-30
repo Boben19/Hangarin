@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Edit profile | Hangarin{% endblock %}
+
+{% block content %}
+<a href="{% url 'profile' %}" class="back-link">&larr; My progress</a>
+
+<div class="form-page">
+    <div class="form-card form-card-wide">
+        <div class="form-card-head">
+            <div>
+                <h1>Edit profile</h1>
+                <p class="page-sub">This is how you show up in Hangarin.</p>
+            </div>
+            <a href="{% url 'profile' %}" class="form-close" aria-label="Close">&times;</a>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" class="stack-form" novalidate>
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="field-error field-error-block">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            <div class="avatar-edit">
+                <div class="avatar-preview" data-avatar-preview>
+                    {% include "todo/_avatar.html" with p=profile size="xl" %}
+                </div>
+                <div class="avatar-edit-fields">
+                    <label for="{{ form.avatar.id_for_label }}" class="avatar-pick btn btn-outline-green btn-small">Choose a picture</label>
+                    {{ form.avatar }}
+                    <p class="field-help">{{ form.avatar.help_text }}</p>
+                    {% for error in form.avatar.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+                    {% if profile.avatar %}
+                    <label class="checkbox-inline">{{ form.remove_avatar }} <span>{{ form.remove_avatar.label }}</span></label>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="field-row">
+                <div class="field{% if form.first_name.errors %} has-error{% endif %}">
+                    <label for="{{ form.first_name.id_for_label }}">{{ form.first_name.label }}</label>
+                    {{ form.first_name }}
+                    {% for error in form.first_name.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+                </div>
+                <div class="field{% if form.last_name.errors %} has-error{% endif %}">
+                    <label for="{{ form.last_name.id_for_label }}">{{ form.last_name.label }}</label>
+                    {{ form.last_name }}
+                    {% for error in form.last_name.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+                </div>
+            </div>
+
+            <div class="field{% if form.username.errors %} has-error{% endif %}">
+                <label for="{{ form.username.id_for_label }}">Username<span class="req">*</span></label>
+                {{ form.username }}
+                {% if form.username.help_text %}<p class="field-help">{{ form.username.help_text }}</p>{% endif %}
+                {% for error in form.username.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+            </div>
+
+            <div class="field">
+                <label>Email</label>
+                <p class="static-value">{{ profile.user.email|default:"No email on file" }}
+                    <a href="{% url 'account_email' %}" class="text-link">Manage</a></p>
+            </div>
+
+            <div class="field{% if form.bio.errors %} has-error{% endif %}">
+                <label for="{{ form.bio.id_for_label }}">About you</label>
+                {{ form.bio }}
+                {% for error in form.bio.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+            </div>
+
+            <div class="field-row">
+                <div class="field{% if form.daily_goal.errors %} has-error{% endif %}">
+                    <label for="{{ form.daily_goal.id_for_label }}">Daily goal</label>
+                    {{ form.daily_goal }}
+                    <p class="field-help">{{ form.daily_goal.help_text }}</p>
+                    {% for error in form.daily_goal.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+                </div>
+                <div class="field{% if form.theme.errors %} has-error{% endif %}">
+                    <label for="{{ form.theme.id_for_label }}">Appearance</label>
+                    {{ form.theme }}
+                    {% for error in form.theme.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a href="{% url 'profile' %}" class="btn btn-outline-green btn-small">Cancel</a>
+                <button type="submit" class="btn btn-primary btn-small">Save profile</button>
+            </div>
+        </form>
+
+        <div class="form-side-links">
+            <a href="{% url 'account_change_password' %}" class="text-link">Change password</a>
+            <a href="{% url 'account-delete' %}" class="text-link text-link-danger">Delete my account</a>
+        </div>
+    </div>
+</div>
+{% endblock %}
