@@ -80,7 +80,7 @@
                         <span class="theme-ico" aria-hidden="true"></span>
                         <span class="theme-label">Theme</span>
                     </button>
-                    <form method="post" action="{% url 'account_logout' %}" class="logout-form">
+                    <form method="post" action="{% url 'account_logout' %}" class="logout-form" data-logout-form>
                         {% csrf_token %}
                         <button type="submit" class="side-logout">Log out</button>
                     </form>

@@ -94,4 +94,13 @@
     window.addEventListener("online", function () {
         say("Back online.", "success");
     });
+
+    document.querySelectorAll("[data-logout-form]").forEach(function (form) {
+        form.addEventListener("submit", function () {
+            if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+                navigator.serviceWorker.controller.postMessage({ type: "HANGARIN_CLEAR_PRIVATE_CACHE" });
+            }
+        });
+    });
+
 })();

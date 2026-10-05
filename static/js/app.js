@@ -11,7 +11,72 @@ document.addEventListener("DOMContentLoaded", function () {
     initSearchAutoSubmit();
     initThemeToggle();
     initAvatarPreview();
+    initHistoryBack();
+    initOfflineState();
+    initFormDrafts();
+    initOfflineActionQueue();
 });
+
+
+function initHistoryBack() {
+    document.querySelectorAll("[data-history-back]").forEach(function (link) {
+        link.addEventListener("click", function (e) {
+            if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+            try {
+                var previous = new URL(document.referrer, window.location.href);
+                if (previous.origin === window.location.origin && window.history.length > 1) {
+                    e.preventDefault();
+                    window.history.back();
+                }
+            } catch (err) { /* use the normal fallback href */ }
+        });
+    });
+}
+
+function initOfflineState() {
+    function updateOffline() {
+        document.documentElement.classList.toggle("is-offline", !navigator.onLine);
+    }
+    updateOffline();
+    window.addEventListener("offline", function () {
+        updateOffline();
+        showToast("You're offline. Hangarin will keep this page available and save form drafts on this device.", "error");
+    });
+    window.addEventListener("online", function () {
+        updateOffline();
+        showToast("You're back online.", "success");
+    });
+}
+
+function initFormDrafts() {
+    document.querySelectorAll("form[data-draft-key]").forEach(function (form) {
+        var key = form.getAttribute("data-draft-key");
+        if (!key) return;
+        try {
+            var saved = localStorage.getItem(key);
+            if (saved) {
+                var data = JSON.parse(saved);
+                Object.keys(data).forEach(function (name) {
+                    var field = form.elements.namedItem(name);
+                    if (field && ["INPUT", "TEXTAREA", "SELECT"].indexOf(field.tagName) !== -1) field.value = data[name];
+                });
+            }
+        } catch (err) { /* storage may be disabled */ }
+        form.addEventListener("input", function () {
+            try {
+                var data = {};
+                Array.from(form.elements).forEach(function (field) {
+                    if (!field.name || field.type === "hidden" || field.type === "submit" || field.type === "button" || field.type === "file" || field.type === "password") return;
+                    data[field.name] = field.value;
+                });
+                localStorage.setItem(key, JSON.stringify(data));
+            } catch (err) { /* ignore */ }
+        });
+        form.addEventListener("submit", function () {
+            try { localStorage.removeItem(key); } catch (err) { /* ignore */ }
+        });
+    });
+}
 
 
 /* ---------------------------------------------------------------
@@ -137,6 +202,57 @@ function showToast(message, kind) {
 }
 
 
+function offlineActions() {
+    try { return JSON.parse(localStorage.getItem("hangarin-offline-actions") || "[]"); }
+    catch (err) { return []; }
+}
+
+function saveOfflineActions(actions) {
+    try { localStorage.setItem("hangarin-offline-actions", JSON.stringify(actions)); } catch (err) { /* ignore */ }
+}
+
+function queueOfflineAction(url) {
+    var actions = offlineActions();
+    if (!actions.some(function (item) { return item.url === url; })) {
+        actions.push({ url: url, createdAt: Date.now() });
+        saveOfflineActions(actions);
+    }
+}
+
+function initOfflineActionQueue() {
+    window.addEventListener("online", flushOfflineActions);
+    if (navigator.onLine) window.setTimeout(flushOfflineActions, 500);
+}
+
+function flushOfflineActions() {
+    var actions = offlineActions();
+    if (!actions.length || !navigator.onLine) return;
+
+    var remaining = actions.slice();
+    actions.reduce(function (promise, item) {
+        return promise.then(function () {
+            return fetch(item.url, {
+                method: "POST",
+                credentials: "same-origin",
+                headers: { "X-Requested-With": "XMLHttpRequest", "X-CSRFToken": csrfToken() }
+            }).then(function (res) {
+                if (res.ok) {
+                    remaining = remaining.filter(function (x) { return x !== item; });
+                    saveOfflineActions(remaining);
+                    return;
+                }
+                if (res.status === 403 || res.status === 401) {
+                    remaining = remaining.filter(function (x) { return x !== item; });
+                    saveOfflineActions(remaining);
+                }
+            }).catch(function () { /* keep it queued for the next connection */ });
+        });
+    }, Promise.resolve()).then(function () {
+        if (actions.length && remaining.length < actions.length) showToast("Your offline changes have been synced.", "success");
+    });
+}
+
+
 /* ---------------------------------------------------------------
    Click a status to cycle Pending -> In Progress -> Completed
    --------------------------------------------------------------- */
@@ -166,9 +282,12 @@ function initStatusToggles() {
                     celebrate(btn, data);
                 })
                 .catch(function () {
-                    // something went wrong (logged out, offline...), so show
-                    // the real state instead of pretending
-                    window.location.reload();
+                    if (!navigator.onLine) {
+                        queueOfflineAction(url);
+                        showToast("Saved for later. This status change will sync when you're back online.", "success");
+                    } else {
+                        window.location.reload();
+                    }
                 })
                 .finally(function () {
                     btn.disabled = false;

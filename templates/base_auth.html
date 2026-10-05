@@ -35,6 +35,9 @@
         </div>
         {% endif %}
 
+        <a class="auth-back" href="{% block auth_back_url %}{% url 'account_login' %}{% endblock %}" data-history-back aria-label="Go back">
+            <span aria-hidden="true">←</span> Back
+        </a>
         {% block auth_content %}{% endblock %}
     </div>
     <script src="{% static 'js/app.js' %}" defer></script>
