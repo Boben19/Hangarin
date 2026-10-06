@@ -1,0 +1,10 @@
+{% comment %}
+The Back button. With JavaScript it steps back through the browser history (so
+it really does return to the page you came from); without it, or when there is
+no history (a bookmark, the installed app), the link goes to `fallback`.
+Usage: include "_back.html" with fallback=some_url label="Tasks"
+{% endcomment %}
+<a href="{{ fallback }}" class="back-btn" data-back{% if optional %} data-back-optional hidden{% endif %}>
+    <svg class="i" aria-hidden="true"><use href="#i-arrow-left"></use></svg>
+    <span>{{ label|default:"Back" }}</span>
+</a>

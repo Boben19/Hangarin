@@ -2,23 +2,24 @@
 
 {% block title %}Delete | Hangarin{% endblock %}
 
+{% block back %}{% include "_back.html" with fallback=cancel_url %}{% endblock %}
+
 {% block content %}
 <div class="form-page">
-    <div class="form-card form-card-danger">
+    <div class="form-card form-card-danger glass">
         <div class="form-card-head">
-            <a href="{{ cancel_url }}" class="form-back" data-history-back><span aria-hidden="true">←</span> Back</a>
             <h1>Delete this?</h1>
-            <a href="{{ cancel_url }}" class="form-close" aria-label="Close">&times;</a>
+            <a href="{{ cancel_url }}" class="form-close" aria-label="Close"><svg class="i" aria-hidden="true"><use href="#i-x"></use></svg></a>
         </div>
 
         <p class="confirm-copy">
-            You're about to permanently delete {{ object_label }}. There's no undo on this one.
+            This permanently deletes {{ object_label }}. It can't be undone.
         </p>
 
         <form method="post" class="form-actions">
             {% csrf_token %}
             <a href="{{ cancel_url }}" class="btn btn-outline-green btn-small">Keep it</a>
-            <button type="submit" class="btn btn-danger btn-small">Yes, delete it</button>
+            <button type="submit" class="btn btn-danger btn-small">Delete</button>
         </form>
     </div>
 </div>

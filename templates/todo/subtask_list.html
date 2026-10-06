@@ -8,7 +8,7 @@
         <h1>Subtasks</h1>
         <p class="page-sub">{{ paginator.count }} subtask{{ paginator.count|pluralize }} across your tasks.</p>
     </div>
-    <a href="{% url 'subtask-create' %}" class="btn btn-primary btn-small">+ New subtask</a>
+    <a href="{% url 'subtask-create' %}" class="btn btn-primary btn-small"><svg class="i" aria-hidden="true"><use href="#i-plus"></use></svg> New subtask</a>
 </div>
 
 <nav class="filter-chips" aria-label="Filter by status">
@@ -18,45 +18,46 @@
     {% endfor %}
 </nav>
 
-<form class="toolbar" method="get">
+<form class="toolbar glass" method="get">
     {% if status %}<input type="hidden" name="status" value="{{ status }}">{% endif %}
-    <input type="search" name="q" value="{{ query }}" placeholder="Search subtask or parent task…" class="toolbar-search" aria-label="Search subtasks" data-search>
+    <input type="search" name="q" value="{{ query }}" placeholder="Search subtask or parent task" class="toolbar-search" aria-label="Search subtasks" data-search>
     <select name="sort_by" class="toolbar-sort" data-autosubmit aria-label="Sort by">
         <option value="title" {% if sort_by == "title" or not sort_by %}selected{% endif %}>Title (A–Z)</option>
         <option value="-title" {% if sort_by == "-title" %}selected{% endif %}>Title (Z–A)</option>
         <option value="parent_task__title" {% if sort_by == "parent_task__title" %}selected{% endif %}>Parent task</option>
         <option value="status" {% if sort_by == "status" %}selected{% endif %}>Status</option>
     </select>
-    <button type="submit" class="btn btn-outline-green btn-small">Search</button>
+    <button type="submit" class="btn btn-outline-green btn-small"><svg class="i" aria-hidden="true"><use href="#i-search"></use></svg> Search</button>
     {% if query or sort_by or status %}<a href="{% url 'subtask-list' %}" class="toolbar-clear">Clear</a>{% endif %}
 </form>
 
 {% if subtasks %}
 <div class="row-list">
     {% for subtask in subtasks %}
-    <div class="row-item">
+    <div class="row-item glass" data-offline-item>
         <button type="button"
                 class="status-toggle row-dot status-{{ subtask.status|slugify }}"
                 data-toggle-url="{% url 'subtask-toggle-status' subtask.pk %}"
+                data-label="{{ subtask.title }}"
                 aria-label="Change status of {{ subtask.title }}"
                 title="Click to move to the next status"></button>
         <div class="row-main">
             <a href="{% url 'task-detail' subtask.parent_task_id %}" class="row-title">{{ subtask.title }}</a>
-            <span class="row-sub">part of <strong>{{ subtask.parent_task_name }}</strong></span>
+            <span class="row-sub">in <strong>{{ subtask.parent_task_name }}</strong></span>
         </div>
         <span class="badge badge-{{ subtask.status|slugify }}">{{ subtask.status }}</span>
         <span class="row-actions">
-            <a href="{% url 'subtask-update' subtask.pk %}" title="Edit" aria-label="Edit {{ subtask.title }}">✎</a>
-            <a href="{% url 'subtask-delete' subtask.pk %}" title="Delete" aria-label="Delete {{ subtask.title }}">🗑</a>
+            <a href="{% url 'subtask-update' subtask.pk %}" title="Edit" aria-label="Edit {{ subtask.title }}"><svg class="i" aria-hidden="true"><use href="#i-edit"></use></svg></a>
+            <a href="{% url 'subtask-delete' subtask.pk %}" title="Delete" aria-label="Delete {{ subtask.title }}"><svg class="i" aria-hidden="true"><use href="#i-trash"></use></svg></a>
         </span>
     </div>
     {% endfor %}
 </div>
 {% else %}
-<div class="empty-state">
-    <span class="empty-leaf">🍃</span>
+<div class="empty-state glass">
+    <span class="empty-leaf" aria-hidden="true">🍃</span>
     <h3>No subtasks yet</h3>
-    <p>{% if query or status %}Nothing matches those filters.{% else %}Break a task down into smaller steps from its page.{% endif %}</p>
+    <p>{% if query or status %}Nothing matches those filters.{% else %}Open a task to add steps to it.{% endif %}</p>
 </div>
 {% endif %}
 

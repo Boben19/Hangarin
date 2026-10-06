@@ -6,33 +6,33 @@
 <div class="page-head">
     <div>
         <h1>Categories</h1>
-        <p class="page-sub">{{ paginator.count }} categor{{ paginator.count|pluralize:"y,ies" }} to sort your tasks into.</p>
+        <p class="page-sub">{{ paginator.count }} categor{{ paginator.count|pluralize:"y,ies" }} for sorting your tasks.</p>
     </div>
-    <a href="{% url 'category-create' %}" class="btn btn-primary btn-small">+ New category</a>
+    <a href="{% url 'category-create' %}" class="btn btn-primary btn-small"><svg class="i" aria-hidden="true"><use href="#i-plus"></use></svg> New category</a>
 </div>
 
-<form class="toolbar" method="get">
-    <input type="search" name="q" value="{{ query }}" placeholder="Search categories…" class="toolbar-search" aria-label="Search categories" data-search>
+<form class="toolbar glass" method="get">
+    <input type="search" name="q" value="{{ query }}" placeholder="Search categories" class="toolbar-search" aria-label="Search categories" data-search>
     <select name="sort_by" class="toolbar-sort" data-autosubmit aria-label="Sort by">
         <option value="name" {% if sort_by != "-name" %}selected{% endif %}>A–Z</option>
         <option value="-name" {% if sort_by == "-name" %}selected{% endif %}>Z–A</option>
     </select>
-    <button type="submit" class="btn btn-outline-green btn-small">Search</button>
+    <button type="submit" class="btn btn-outline-green btn-small"><svg class="i" aria-hidden="true"><use href="#i-search"></use></svg> Search</button>
     {% if query or sort_by %}<a href="{% url 'category-list' %}" class="toolbar-clear">Clear</a>{% endif %}
 </form>
 
 {% if categories %}
 <div class="tag-grid">
     {% for category in categories %}
-    <div class="tag-card" data-glow>
+    <div class="tag-card glass" data-glow data-offline-item>
         <div class="tag-card-top">
             <span class="tag-name">{{ category.name }}</span>
             {% if category.is_shared %}
                 <span class="chip chip-default" title="Shared with everyone. Only an admin can change it.">Default</span>
             {% else %}
             <span class="row-actions">
-                <a href="{% url 'category-update' category.pk %}" title="Edit" aria-label="Edit {{ category.name }}">✎</a>
-                <a href="{% url 'category-delete' category.pk %}" title="Delete" aria-label="Delete {{ category.name }}">🗑</a>
+                <a href="{% url 'category-update' category.pk %}" title="Edit" aria-label="Edit {{ category.name }}"><svg class="i" aria-hidden="true"><use href="#i-edit"></use></svg></a>
+                <a href="{% url 'category-delete' category.pk %}" title="Delete" aria-label="Delete {{ category.name }}"><svg class="i" aria-hidden="true"><use href="#i-trash"></use></svg></a>
             </span>
             {% endif %}
         </div>
@@ -41,10 +41,10 @@
     {% endfor %}
 </div>
 {% else %}
-<div class="empty-state">
-    <span class="empty-leaf">▤</span>
+<div class="empty-state glass">
+    <span class="empty-leaf" aria-hidden="true">🗂️</span>
     <h3>No categories yet</h3>
-    <p>{% if query %}Nothing matches "{{ query }}".{% else %}Add one above to start sorting your tasks.{% endif %}</p>
+    <p>{% if query %}Nothing matches "{{ query }}".{% else %}Add one to start sorting your tasks.{% endif %}</p>
 </div>
 {% endif %}
 

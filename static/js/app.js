@@ -9,74 +9,16 @@ document.addEventListener("DOMContentLoaded", function () {
     initToasts();
     initStatusToggles();
     initSearchAutoSubmit();
+    initAutoSubmitSelects();
     initThemeToggle();
     initAvatarPreview();
-    initHistoryBack();
-    initOfflineState();
+    initBackButtons();
+    initPasswordToggles();
+    initAuthForms();
+    initMenuKeys();
     initFormDrafts();
-    initOfflineActionQueue();
+    initEmojiField();
 });
-
-
-function initHistoryBack() {
-    document.querySelectorAll("[data-history-back]").forEach(function (link) {
-        link.addEventListener("click", function (e) {
-            if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
-            try {
-                var previous = new URL(document.referrer, window.location.href);
-                if (previous.origin === window.location.origin && window.history.length > 1) {
-                    e.preventDefault();
-                    window.history.back();
-                }
-            } catch (err) { /* use the normal fallback href */ }
-        });
-    });
-}
-
-function initOfflineState() {
-    function updateOffline() {
-        document.documentElement.classList.toggle("is-offline", !navigator.onLine);
-    }
-    updateOffline();
-    window.addEventListener("offline", function () {
-        updateOffline();
-        showToast("You're offline. Hangarin will keep this page available and save form drafts on this device.", "error");
-    });
-    window.addEventListener("online", function () {
-        updateOffline();
-        showToast("You're back online.", "success");
-    });
-}
-
-function initFormDrafts() {
-    document.querySelectorAll("form[data-draft-key]").forEach(function (form) {
-        var key = form.getAttribute("data-draft-key");
-        if (!key) return;
-        try {
-            var saved = localStorage.getItem(key);
-            if (saved) {
-                var data = JSON.parse(saved);
-                Object.keys(data).forEach(function (name) {
-                    var field = form.elements.namedItem(name);
-                    if (field && ["INPUT", "TEXTAREA", "SELECT"].indexOf(field.tagName) !== -1) field.value = data[name];
-                });
-            }
-        } catch (err) { /* storage may be disabled */ }
-        form.addEventListener("input", function () {
-            try {
-                var data = {};
-                Array.from(form.elements).forEach(function (field) {
-                    if (!field.name || field.type === "hidden" || field.type === "submit" || field.type === "button" || field.type === "file" || field.type === "password") return;
-                    data[field.name] = field.value;
-                });
-                localStorage.setItem(key, JSON.stringify(data));
-            } catch (err) { /* ignore */ }
-        });
-        form.addEventListener("submit", function () {
-            try { localStorage.removeItem(key); } catch (err) { /* ignore */ }
-        });
-    });
-}
 
 
 /* ---------------------------------------------------------------
@@ -103,6 +45,18 @@ function swapPrefixedClass(el, prefix, newValue) {
 function isTyping(target) {
     if (!target) return false;
     return target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName);
+}
+
+
+function svgIcon(name) {
+    var ns = "http://www.w3.org/2000/svg";
+    var svg = document.createElementNS(ns, "svg");
+    svg.setAttribute("class", "i");
+    svg.setAttribute("aria-hidden", "true");
+    var use = document.createElementNS(ns, "use");
+    use.setAttribute("href", "#i-" + name);
+    svg.appendChild(use);
+    return svg;
 }
 
 
@@ -202,57 +156,6 @@ function showToast(message, kind) {
 }
 
 
-function offlineActions() {
-    try { return JSON.parse(localStorage.getItem("hangarin-offline-actions") || "[]"); }
-    catch (err) { return []; }
-}
-
-function saveOfflineActions(actions) {
-    try { localStorage.setItem("hangarin-offline-actions", JSON.stringify(actions)); } catch (err) { /* ignore */ }
-}
-
-function queueOfflineAction(url) {
-    var actions = offlineActions();
-    if (!actions.some(function (item) { return item.url === url; })) {
-        actions.push({ url: url, createdAt: Date.now() });
-        saveOfflineActions(actions);
-    }
-}
-
-function initOfflineActionQueue() {
-    window.addEventListener("online", flushOfflineActions);
-    if (navigator.onLine) window.setTimeout(flushOfflineActions, 500);
-}
-
-function flushOfflineActions() {
-    var actions = offlineActions();
-    if (!actions.length || !navigator.onLine) return;
-
-    var remaining = actions.slice();
-    actions.reduce(function (promise, item) {
-        return promise.then(function () {
-            return fetch(item.url, {
-                method: "POST",
-                credentials: "same-origin",
-                headers: { "X-Requested-With": "XMLHttpRequest", "X-CSRFToken": csrfToken() }
-            }).then(function (res) {
-                if (res.ok) {
-                    remaining = remaining.filter(function (x) { return x !== item; });
-                    saveOfflineActions(remaining);
-                    return;
-                }
-                if (res.status === 403 || res.status === 401) {
-                    remaining = remaining.filter(function (x) { return x !== item; });
-                    saveOfflineActions(remaining);
-                }
-            }).catch(function () { /* keep it queued for the next connection */ });
-        });
-    }, Promise.resolve()).then(function () {
-        if (actions.length && remaining.length < actions.length) showToast("Your offline changes have been synced.", "success");
-    });
-}
-
-
 /* ---------------------------------------------------------------
    Click a status to cycle Pending -> In Progress -> Completed
    --------------------------------------------------------------- */
@@ -262,6 +165,7 @@ function initStatusToggles() {
         btn.addEventListener("click", function () {
             if (btn.disabled) return;
             var url = btn.getAttribute("data-toggle-url");
+            var label = btn.getAttribute("data-label") || "";
             btn.disabled = true;
             btn.classList.add("is-updating");
 
@@ -271,21 +175,31 @@ function initStatusToggles() {
                 headers: {
                     "X-Requested-With": "XMLHttpRequest",
                     "X-CSRFToken": csrfToken(),
+                    // what the "waiting to sync" list calls this if it has to be saved
+                    "X-Hangarin-Label": encodeURIComponent(label ? "Change status of: " + label : ""),
                 },
             })
                 .then(function (res) {
-                    if (!res.ok) throw new Error("toggle failed");
+                    if (!res.ok && res.status !== 202) throw new Error("toggle failed");
                     return res.json();
                 })
                 .then(function (data) {
+                    if (data.queued) {
+                        // no connection: the service worker kept it. Show the
+                        // new status now, it is sent when we're back online.
+                        localCycle(btn);
+                        btn.classList.add("is-queued");
+                        showToast("Saved on this device. It will sync when you're back online.", "success");
+                        return;
+                    }
                     applyStatus(btn, data);
                     celebrate(btn, data);
                 })
                 .catch(function () {
                     if (!navigator.onLine) {
-                        queueOfflineAction(url);
-                        showToast("Saved for later. This status change will sync when you're back online.", "success");
+                        showToast("You're offline and this page can't save changes yet.", "error");
                     } else {
+                        // something went wrong (logged out...), so show the real state
                         window.location.reload();
                     }
                 })
@@ -297,6 +211,47 @@ function initStatusToggles() {
     });
 }
 
+var STATUS_ORDER = [
+    { slug: "pending", label: "Pending" },
+    { slug: "in-progress", label: "In Progress" },
+    { slug: "completed", label: "Completed" },
+];
+
+function slugOf(el) {
+    var found = null;
+    Array.from(el.classList).forEach(function (cls) {
+        var m = cls.match(/^(?:status|badge)-(pending|in-progress|completed)$/);
+        if (m) found = m[1];
+    });
+    return found || "pending";
+}
+
+// Move a status button to the next status without asking the server (used
+// offline). Mirrors _next_status() in views.py.
+function localCycle(btn) {
+    var at = STATUS_ORDER.findIndex(function (o) { return o.slug === slugOf(btn); });
+    var next = STATUS_ORDER[(at + 1) % STATUS_ORDER.length];
+    var data = { slug: next.slug, label: next.label };
+
+    var parent = btn.getAttribute("data-parent");
+    if (parent) {
+        var box = document.querySelector('[data-progress-for="' + parent + '"]');
+        var doneEl = box && box.querySelector("[data-done]");
+        var totalEl = box && box.querySelector("[data-total]");
+        if (doneEl && totalEl) {
+            var done = parseInt(doneEl.textContent, 10) || 0;
+            var total = parseInt(totalEl.textContent, 10) || 0;
+            if (next.slug === "completed") done += 1;
+            if (STATUS_ORDER[at].slug === "completed") done -= 1;
+            done = Math.max(0, Math.min(total, done));
+            data.parent = parent;
+            data.progress = { done: done, total: total, pct: total ? Math.round(done * 100 / total) : 0 };
+        }
+    }
+    applyStatus(btn, data);
+    return data;
+}
+
 function applyStatus(el, data) {
     if (el.classList.contains("badge")) {
         swapPrefixedClass(el, "badge-", data.slug);
@@ -306,7 +261,8 @@ function applyStatus(el, data) {
     }
 
     if (el.classList.contains("subtask-check")) {
-        el.textContent = data.slug === "completed" ? "\u2713" : "";
+        el.textContent = "";
+        if (data.slug === "completed") el.appendChild(svgIcon("check"));
     }
 
     var row = el.closest(".subtask-row");
@@ -357,11 +313,11 @@ function celebrate(btn, data) {
 
     if (data.level_up) {
         showToast(
-            "Level up! You're level " + data.level_up.level + " now: " + data.level_up.title + ".",
+            "You reached level " + data.level_up.level + ": " + data.level_up.title + ".",
             "level"
         );
     } else if (data.goal_hit) {
-        showToast("That's your daily goal of " + data.goal + ". Nice work.", "level");
+        showToast("Daily goal reached (" + data.goal + ").", "level");
     }
 }
 
@@ -503,6 +459,11 @@ function initSearchAutoSubmit() {
         input.addEventListener("input", function () {
             window.clearTimeout(timer);
             timer = window.setTimeout(function () {
+                // no connection: filter what's already on the page instead
+                if (!navigator.onLine && window.hgOfflineFilter) {
+                    window.hgOfflineFilter(input);
+                    return;
+                }
                 try { window.sessionStorage.setItem(SEARCH_FOCUS_KEY, "1"); } catch (err) { /* ignore */ }
                 input.form.submit();
             }, 500);
@@ -530,6 +491,66 @@ function initAvatarPreview() {
         img.src = URL.createObjectURL(file);
         box.textContent = "";
         box.appendChild(img);
+    });
+}
+
+
+/* ---------------------------------------------------------------
+   Emoji in the background shy away from the pointer
+   (they keep wiggling on their own either way)
+   --------------------------------------------------------------- */
+
+function initEmojiField() {
+    var field = document.querySelector(".emoji-field");
+    if (!field || REDUCED_MOTION) return;
+    // phones have no hovering pointer, the wiggle alone is plenty there
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+
+    var items = Array.prototype.slice.call(field.querySelectorAll(".emo"));
+    var RADIUS = 190;      // how close the pointer has to get
+    var PUSH = 70;         // the furthest an emoji gets nudged, in px
+    var pointer = null;
+    var queued = false;
+
+    function paint() {
+        queued = false;
+        items.forEach(function (item) {
+            if (!pointer) {
+                item.style.setProperty("--px", "0px");
+                item.style.setProperty("--py", "0px");
+                return;
+            }
+            // offsetLeft/Top ignore transforms, so the nudge can't feed back into itself
+            var cx = item.offsetLeft + item.offsetWidth / 2;
+            var cy = item.offsetTop + item.offsetHeight / 2;
+            var dx = cx - pointer.x;
+            var dy = cy - pointer.y;
+            var dist = Math.sqrt(dx * dx + dy * dy) || 1;
+            if (dist > RADIUS) {
+                item.style.setProperty("--px", "0px");
+                item.style.setProperty("--py", "0px");
+                return;
+            }
+            var force = (1 - dist / RADIUS) * PUSH;
+            item.style.setProperty("--px", ((dx / dist) * force).toFixed(1) + "px");
+            item.style.setProperty("--py", ((dy / dist) * force).toFixed(1) + "px");
+        });
+    }
+
+    function queue() {
+        if (!queued) {
+            queued = true;
+            window.requestAnimationFrame(paint);
+        }
+    }
+
+    document.addEventListener("pointermove", function (e) {
+        pointer = { x: e.clientX, y: e.clientY };
+        queue();
+    }, { passive: true });
+    document.addEventListener("pointerleave", function () {
+        pointer = null;
+        queue();
     });
 }
 
@@ -658,6 +679,7 @@ document.addEventListener("keydown", function (e) {
 
 document.addEventListener("submit", function (e) {
     var form = e.target;
+    if (e.defaultPrevented) return;   // something else stopped it (offline guard, logout confirm)
     if (!form || !form.method || form.method.toLowerCase() !== "post") return;
 
     var buttons = form.querySelectorAll('button[type="submit"], button:not([type])');
@@ -680,7 +702,7 @@ document.addEventListener("click", function (e) {
     if (!link) return;
     var href = link.getAttribute("href");
     if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
-    if (link.target === "_blank" || link.hasAttribute("download")) return;
+    if (link.target === "_blank" || link.hasAttribute("download") || link.hasAttribute("data-back")) return;
     if (!href || href.charAt(0) === "#" || link.origin !== window.location.origin) return;
     if (REDUCED_MOTION) return;
 
@@ -700,4 +722,201 @@ window.addEventListener("pageshow", function () {
         b.classList.remove("is-busy");
         b.disabled = false;
     });
+});
+
+
+/* ---------------------------------------------------------------
+   Sort and filter dropdowns send the form as soon as you pick
+   --------------------------------------------------------------- */
+
+function initAutoSubmitSelects() {
+    document.querySelectorAll("select[data-autosubmit]").forEach(function (select) {
+        select.addEventListener("change", function () {
+            if (!navigator.onLine) {
+                showToast("Sorting and filtering need a connection.", "error");
+                return;
+            }
+            if (select.form) select.form.submit();
+        });
+    });
+}
+
+
+/* ---------------------------------------------------------------
+   Back button: really goes back to the page you came from. Without
+   history (a bookmark, the installed app) the link's own address is used.
+   --------------------------------------------------------------- */
+
+function initBackButtons() {
+    var cameFromHere = false;
+    var cameFromAForm = false;
+    try {
+        if (document.referrer) {
+            var ref = new URL(document.referrer);
+            cameFromHere = ref.origin === window.location.origin && document.referrer !== window.location.href;
+            // after saving a form you land on the next page; going "back" to
+            // the finished form isn't what anyone wants
+            cameFromAForm = /\/(new|edit|delete)\/$/.test(ref.pathname);
+        }
+    } catch (err) { /* no usable referrer */ }
+
+    var canGoBack = window.history.length > 1 && cameFromHere && !cameFromAForm;
+
+    document.querySelectorAll("[data-back]").forEach(function (link) {
+        if (link.hasAttribute("data-back-optional") && canGoBack) link.hidden = false;
+        link.addEventListener("click", function (e) {
+            if (!canGoBack) return;
+            e.preventDefault();
+            window.history.back();
+        });
+    });
+}
+
+
+/* ---------------------------------------------------------------
+   Show / hide password
+   --------------------------------------------------------------- */
+
+function initPasswordToggles() {
+    document.querySelectorAll("[data-pw-toggle]").forEach(function (btn) {
+        var input = btn.parentElement.querySelector("input");
+        if (!input) return;
+        btn.hidden = false;   // hidden until now so it never shows without JavaScript
+        btn.addEventListener("click", function () {
+            var show = input.type === "password";
+            input.type = show ? "text" : "password";
+            btn.setAttribute("aria-pressed", String(show));
+            btn.setAttribute("aria-label", show ? "Hide password" : "Show password");
+        });
+    });
+}
+
+
+/* ---------------------------------------------------------------
+   Log in / sign up pages
+   --------------------------------------------------------------- */
+
+function initAuthForms() {
+    // Focus the first field on computers. Not on phones, where it would pop
+    // the keyboard up over the page before it has been read.
+    var form = document.querySelector(".auth-form");
+    if (form && window.matchMedia("(pointer: fine)").matches) {
+        var target = form.querySelector('[aria-invalid="true"]') ||
+                     form.querySelector('input:not([type="hidden"]):not([type="checkbox"])');
+        if (target) target.focus();
+    }
+
+    // These forms need the server. Say so instead of failing with a browser error.
+    document.addEventListener("submit", function (e) {
+        var f = e.target;
+        if (!f.hasAttribute || !f.hasAttribute("data-needs-online") || navigator.onLine) return;
+        e.preventDefault();
+        var notice = f.querySelector(".form-offline-note") ||
+                     (f.closest(".auth-card") && f.closest(".auth-card").querySelector(".form-offline-note"));
+        if (notice) notice.hidden = false;
+        else showToast("You're offline. This needs a connection.", "error");
+    }, true);
+
+    window.addEventListener("online", function () {
+        document.querySelectorAll(".form-offline-note").forEach(function (n) { n.hidden = true; });
+    });
+
+    // Passwords on the sign-up form: say right away if the two don't match
+    var p1 = document.getElementById("id_password1");
+    var p2 = document.getElementById("id_password2");
+    if (p1 && p2) {
+        var hint = document.createElement("p");
+        hint.className = "field-error";
+        hint.hidden = true;
+        hint.textContent = "The passwords don't match yet.";
+        p2.closest(".auth-field").appendChild(hint);
+        var check = function () { hint.hidden = !p2.value || p1.value === p2.value; };
+        p1.addEventListener("input", check);
+        p2.addEventListener("input", check);
+    }
+}
+
+
+/* ---------------------------------------------------------------
+   Mobile menu: Escape closes it
+   --------------------------------------------------------------- */
+
+function initMenuKeys() {
+    var navToggle = document.getElementById("nav-toggle");
+    if (!navToggle) return;
+    document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && navToggle.checked) {
+            navToggle.checked = false;
+            var burger = document.querySelector(".hamburger");
+            if (burger) burger.focus();
+        }
+    });
+}
+
+
+/* ---------------------------------------------------------------
+   Drafts: what you typed into a form is kept on this device until you
+   save it, so a dropped connection or an accidental tab close doesn't
+   lose it. Cleared on save, and on logout (see offline.js) so nothing
+   is left behind on a shared computer.
+   --------------------------------------------------------------- */
+
+var DRAFT_PREFIX = "hangarin-draft-";
+
+function clearDrafts() {
+    try {
+        Object.keys(window.localStorage).forEach(function (key) {
+            if (key.indexOf(DRAFT_PREFIX) === 0) window.localStorage.removeItem(key);
+        });
+    } catch (err) { /* storage blocked */ }
+}
+
+function initFormDrafts() {
+    document.querySelectorAll("form[data-draft-key]").forEach(function (form) {
+        var key = form.getAttribute("data-draft-key");
+        if (!key) return;
+
+        // a form the server sent back with errors already holds what the
+        // person typed; a draft would only get in the way
+        var hasErrors = !!form.querySelector(".has-error");
+
+        if (!hasErrors) {
+            try {
+                var saved = window.localStorage.getItem(key);
+                if (saved) {
+                    var data = JSON.parse(saved);
+                    var restored = false;
+                    Object.keys(data).forEach(function (name) {
+                        var field = form.elements.namedItem(name);
+                        if (field && field.value !== undefined && field.value !== data[name]) {
+                            field.value = data[name];
+                            restored = true;
+                        }
+                    });
+                    if (restored) showToast("Restored what you were typing.", "success");
+                }
+            } catch (err) { /* storage blocked or bad data */ }
+        }
+
+        form.addEventListener("input", function () {
+            try {
+                var draft = {};
+                Array.from(form.elements).forEach(function (field) {
+                    var skip = ["hidden", "submit", "button", "file", "password"];
+                    if (!field.name || skip.indexOf(field.type) !== -1) return;
+                    draft[field.name] = field.value;
+                });
+                window.localStorage.setItem(key, JSON.stringify(draft));
+            } catch (err) { /* ignore */ }
+        });
+        form.addEventListener("submit", function () {
+            try { window.localStorage.removeItem(key); } catch (err) { /* ignore */ }
+        });
+    });
+}
+
+// any logout form: drop saved drafts (unless a confirm in offline.js cancelled it)
+document.addEventListener("submit", function (e) {
+    var form = e.target;
+    if (!e.defaultPrevented && form.hasAttribute && form.hasAttribute("data-logout")) clearDrafts();
 });

@@ -1,8 +1,9 @@
-<article class="task-card status-{{ task.status|slugify }}{% if task.is_overdue %} is-overdue{% endif %}" data-glow>
+<article class="task-card glass status-{{ task.status|slugify }}{% if task.is_overdue %} is-overdue{% endif %}" data-glow data-offline-item>
     <div class="task-card-top">
         <button type="button"
                 class="status-toggle badge badge-{{ task.status|slugify }}"
                 data-toggle-url="{% url 'task-toggle-status' task.pk %}"
+                data-label="{{ task.title }}"
                 title="Click to move to the next status">
             {{ task.status }}
         </button>
@@ -28,14 +29,14 @@
 
     <div class="task-meta">
         {% if task.category %}<span class="chip chip-category">{{ task.category.name }}</span>{% endif %}
-        {% if task.deadline %}<span class="task-deadline{% if task.is_overdue %} is-late{% endif %}">📅 {{ task.deadline|date:"M j, Y, g:i A" }}</span>{% endif %}
+        {% if task.deadline %}<span class="task-deadline{% if task.is_overdue %} is-late{% endif %}"><span class="emo-inline" aria-hidden="true">📅</span> {{ task.deadline|date:"M j, Y, g:i A" }}</span>{% endif %}
     </div>
     <div class="task-foot">
         <span>{{ task.n_sub }} subtask{{ task.n_sub|pluralize }}</span>
         <span>{{ task.n_notes }} note{{ task.n_notes|pluralize }}</span>
         <span class="row-actions task-card-actions">
-            <a href="{% url 'task-update' task.pk %}" title="Edit" aria-label="Edit {{ task.title }}">✎</a>
-            <a href="{% url 'task-delete' task.pk %}" title="Delete" aria-label="Delete {{ task.title }}">🗑</a>
+            <a href="{% url 'task-update' task.pk %}" title="Edit" aria-label="Edit {{ task.title }}"><svg class="i" aria-hidden="true"><use href="#i-edit"></use></svg></a>
+            <a href="{% url 'task-delete' task.pk %}" title="Delete" aria-label="Delete {{ task.title }}"><svg class="i" aria-hidden="true"><use href="#i-trash"></use></svg></a>
         </span>
     </div>
 </article>

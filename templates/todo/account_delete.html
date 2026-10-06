@@ -2,14 +2,14 @@
 
 {% block title %}Delete account | Hangarin{% endblock %}
 
-{% block content %}
-<a href="{% url 'profile-edit' %}" class="back-link">&larr; Edit profile</a>
+{% block back %}{% url 'profile-edit' as e_url %}{% include "_back.html" with fallback=e_url label="Edit profile" %}{% endblock %}
 
+{% block content %}
 <div class="form-page">
-    <div class="form-card form-card-danger">
+    <div class="form-card form-card-danger glass">
         <div class="form-card-head">
             <h1>Delete your account</h1>
-            <a href="{% url 'profile-edit' %}" class="form-close" aria-label="Close">&times;</a>
+            <a href="{% url 'profile-edit' %}" class="form-close" aria-label="Close"><svg class="i" aria-hidden="true"><use href="#i-x"></use></svg></a>
         </div>
 
         <p class="confirm-copy">
@@ -17,7 +17,7 @@
             {{ n_tasks }} task{{ n_tasks|pluralize }},
             {{ n_subtasks }} subtask{{ n_subtasks|pluralize }},
             {{ n_notes }} note{{ n_notes|pluralize }}, your own categories and priorities,
-            and your profile picture. There is no way to get it back.
+            and your profile picture. It can't be undone.
         </p>
         <p class="confirm-copy">
             Want a copy first? <a href="{% url 'task-export' %}" class="text-link">Download your tasks as a CSV</a>.

@@ -1,16 +1,11 @@
-// PWA bits: registers the service worker, wires up the "Install Hangarin"
-// button, and says something when the connection drops.
+// PWA bits: registers the service worker and runs the "Install Hangarin"
+// button. (Online/offline messages live in offline.js.)
 //
-// The registration lives here (a file on our own domain) instead of in an
-// inline <script>, because the Content-Security-Policy in middleware.py
-// only allows scripts from this site.
+// The registration is here, in a file on our own domain, because the
+// Content-Security-Policy in middleware.py only allows scripts from this site.
 
 (function () {
     "use strict";
-
-    /* -----------------------------------------------------------
-       Service worker
-       ----------------------------------------------------------- */
 
     if ("serviceWorker" in navigator) {
         window.addEventListener("load", function () {
@@ -22,11 +17,6 @@
                 });
         });
     }
-
-
-    /* -----------------------------------------------------------
-       Install button
-       ----------------------------------------------------------- */
 
     var buttons = document.querySelectorAll("[data-install]");
     var savedPrompt = null;
@@ -46,7 +36,6 @@
     }
 
     function say(message, kind) {
-        // showToast comes from app.js
         if (typeof showToast === "function") showToast(message, kind);
     }
 
@@ -54,7 +43,6 @@
         if (onIos) showInstall(true);
 
         window.addEventListener("beforeinstallprompt", function (e) {
-            // hold on to it so the button can trigger it later
             e.preventDefault();
             savedPrompt = e;
             showInstall(true);
@@ -66,8 +54,7 @@
             if (savedPrompt) {
                 savedPrompt.prompt();
                 savedPrompt.userChoice.then(function () {
-                    // the prompt can only be used once
-                    savedPrompt = null;
+                    savedPrompt = null;   // it can only be used once
                     showInstall(false);
                 });
             } else if (onIos) {
@@ -79,28 +66,6 @@
     window.addEventListener("appinstalled", function () {
         savedPrompt = null;
         showInstall(false);
-        say("Hangarin is installed. You'll find it with your other apps.", "success");
+        say("Hangarin is installed.", "success");
     });
-
-
-    /* -----------------------------------------------------------
-       Online / offline
-       ----------------------------------------------------------- */
-
-    window.addEventListener("offline", function () {
-        say("You're offline. Changes won't save until you're back.", "error");
-    });
-
-    window.addEventListener("online", function () {
-        say("Back online.", "success");
-    });
-
-    document.querySelectorAll("[data-logout-form]").forEach(function (form) {
-        form.addEventListener("submit", function () {
-            if (navigator.serviceWorker && navigator.serviceWorker.controller) {
-                navigator.serviceWorker.controller.postMessage({ type: "HANGARIN_CLEAR_PRIVATE_CACHE" });
-            }
-        });
-    });
-
 })();

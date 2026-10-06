@@ -2,24 +2,24 @@
 
 {% block title %}Edit profile | Hangarin{% endblock %}
 
-{% block content %}
-<a href="{% url 'profile' %}" class="back-link">&larr; My progress</a>
+{% block back %}{% url 'profile' as p_url %}{% include "_back.html" with fallback=p_url label="My progress" %}{% endblock %}
 
+{% block content %}
 <div class="form-page">
-    <div class="form-card form-card-wide">
+    <div class="form-card form-card-wide glass">
         <div class="form-card-head">
             <div>
                 <h1>Edit profile</h1>
-                <p class="page-sub">This is how you show up in Hangarin.</p>
+                <p class="page-sub">Your name, picture and settings.</p>
             </div>
-            <a href="{% url 'profile' %}" class="form-close" aria-label="Close">&times;</a>
+            <a href="{% url 'profile' %}" class="form-close" aria-label="Close"><svg class="i" aria-hidden="true"><use href="#i-x"></use></svg></a>
         </div>
 
         <form method="post" enctype="multipart/form-data" class="stack-form" novalidate>
             {% csrf_token %}
 
             {% if form.non_field_errors %}
-                <div class="field-error field-error-block">{{ form.non_field_errors }}</div>
+                <div class="form-alert" role="alert">{{ form.non_field_errors }}</div>
             {% endif %}
 
             <div class="avatar-edit">

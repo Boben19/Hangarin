@@ -62,17 +62,17 @@ def _greeting(name):
 def _hero_line(summary):
     today = summary["today"]
     if summary["total"] == 0:
-        return "Your list is empty. Add the first thing you need to get done."
+        return "Your list is empty. Add your first task below."
     if summary["overdue"]:
         n = summary["overdue"]
-        return f"{n} task{'s are' if n != 1 else ' is'} past due. Worth starting with those."
+        return f"{n} task{'s are' if n != 1 else ' is'} overdue."
     if today["hit"]:
-        return "You've hit today's goal. Anything else is a bonus."
+        return "You've reached today's goal."
     if today["done"]:
         return f"{today['left']} more to reach today's goal of {today['goal']}."
     if summary["open"] == 0:
-        return "Everything is done. Nice and quiet."
-    return f"You have {summary['open']} open. Pick one and get it moving."
+        return "Everything on your list is done."
+    return f"You have {summary['open']} task{'s' if summary['open'] != 1 else ''} open."
 
 
 class HomePageView(TemplateView):
@@ -344,7 +344,7 @@ class TaskCreateView(SuccessMessageMixin, FormPageMixin, CreateView):
     form_class = TaskForm
     form_title = "New task"
     submit_label = "Add task"
-    form_hint = "Plant something new on your list."
+    form_hint = "What do you need to get done?"
     success_message = '"%(title)s" was added to your tasks.'
 
     def form_valid(self, form):

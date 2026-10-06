@@ -1,17 +1,17 @@
 {% if is_paginated %}
 <nav class="pager" aria-label="Pagination">
     {% if page_obj.has_previous %}
-        <a class="pager-btn" href="{% querystring page=page_obj.previous_page_number %}">← Prev</a>
+        <a class="pager-btn" href="{% querystring page=page_obj.previous_page_number %}"><svg class="i" aria-hidden="true"><use href="#i-arrow-left"></use></svg> Prev</a>
     {% else %}
-        <span class="pager-btn is-disabled">← Prev</span>
+        <span class="pager-btn is-disabled"><svg class="i" aria-hidden="true"><use href="#i-arrow-left"></use></svg> Prev</span>
     {% endif %}
 
     <span class="pager-status">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
 
     {% if page_obj.has_next %}
-        <a class="pager-btn" href="{% querystring page=page_obj.next_page_number %}">Next →</a>
+        <a class="pager-btn" href="{% querystring page=page_obj.next_page_number %}">Next <svg class="i" aria-hidden="true"><use href="#i-arrow-right"></use></svg></a>
     {% else %}
-        <span class="pager-btn is-disabled">Next →</span>
+        <span class="pager-btn is-disabled">Next <svg class="i" aria-hidden="true"><use href="#i-arrow-right"></use></svg></span>
     {% endif %}
 </nav>
 {% endif %}

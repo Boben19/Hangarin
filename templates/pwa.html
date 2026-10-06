@@ -1,0 +1,34 @@
+{% comment %}
+This replaces the template that ships with django-pwa. The original ends with
+an inline <script> that registers the service worker, which our
+Content-Security-Policy blocks (scripts may only come from this site) and
+which printed an error on every page. static/js/pwa.js does the registering.
+{% endcomment %}
+<link rel="manifest" href="/manifest.json">
+
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="application-name" content="{{ PWA_APP_NAME }}">
+<meta name="theme-color" content="{{ PWA_APP_THEME_COLOR }}">
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="{{ PWA_APP_NAME }}">
+<meta name="apple-mobile-web-app-status-bar-style" content="{{ PWA_APP_STATUS_BAR_COLOR }}">
+
+{% if PWA_APP_ICONS_APPLE %}
+    {% for icon in PWA_APP_ICONS_APPLE %}
+<link rel="apple-touch-icon" href="{{ icon.src }}" sizes="{{ icon.sizes }}">
+    {% endfor %}
+{% else %}
+    {% for icon in PWA_APP_ICONS %}
+<link rel="apple-touch-icon" href="{{ icon.src }}" sizes="{{ icon.sizes }}">
+    {% endfor %}
+{% endif %}
+
+{% for splash in PWA_APP_SPLASH_SCREEN %}
+<link href="{{ splash.src }}" media="{{ splash.media }}" rel="apple-touch-startup-image">
+{% endfor %}
+
+<meta name="msapplication-TileColor" content="{{ PWA_APP_BACKGROUND_COLOR }}">
+{% with PWA_APP_ICONS|last as icon %}
+<meta name="msapplication-TileImage" content="{{ icon.src }}">
+{% endwith %}

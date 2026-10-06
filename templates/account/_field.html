@@ -1,0 +1,26 @@
+{% comment %}
+One labelled field on the log in / sign up pages, with every error listed
+(not just the first), a hint if there is one, and a show/hide button for
+passwords.
+Usage: include "account/_field.html" with field=form.password password=True help="..."
+{% endcomment %}
+<div class="auth-field{% if field.errors %} has-error{% endif %}">
+    <label class="auth-label" for="{{ field.id_for_label }}">{{ label|default:field.label }}</label>
+    {% if password %}
+    <div class="pw-wrap">
+        {{ field }}
+        <button type="button" class="pw-toggle" data-pw-toggle aria-label="Show password" aria-pressed="false" hidden>
+            <svg class="i i-show" aria-hidden="true"><use href="#i-eye"></use></svg>
+            <svg class="i i-hide" aria-hidden="true"><use href="#i-eye-off"></use></svg>
+        </button>
+    </div>
+    {% else %}
+    {{ field }}
+    {% endif %}
+    {% if help %}<p class="field-help">{{ help }}</p>{% endif %}
+    {% if field.errors %}
+    <div class="field-errors" id="{{ field.id_for_label }}-err">
+        {% for error in field.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+    </div>
+    {% endif %}
+</div>

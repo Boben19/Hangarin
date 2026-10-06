@@ -5,24 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="color-scheme" content="light dark">
     <title>Offline | Hangarin</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8C%B1%3C/text%3E%3C/svg%3E">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body class="auth-body">
+    {% include "_icons.html" %}
+    {% include "_backdrop.html" %}
     <div class="auth-page">
-        <div class="auth-card">
-            <div class="auth-brand">
-                <span class="auth-mark">🍂</span>
-                <h1>You're offline</h1>
-                <p class="auth-sub">
-                    Hangarin is offline right now. If you opened this app before losing
-                    your connection, previously visited pages may still be available.
-                    Anything you type into a supported form is kept as a local draft
-                    until you can submit it again.
-                </p>
+        <div class="auth-card glass error-card offline-card">
+            <span class="auth-mark" aria-hidden="true">🍂</span>
+            <h1>You're offline</h1>
+            <p class="error-text">
+                This page isn't saved on your device yet. Pages you've already
+                opened still work, and any changes you make are kept here and
+                sent when you're back online.
+            </p>
+            <div class="offline-links">
+                <a href="/" class="btn btn-primary">Open Home</a>
+                <a href="/tasks/" class="btn btn-outline-green">My tasks</a>
             </div>
-            {# empty href = reload whatever page you were trying to open #}
-            <a href="" class="btn btn-primary auth-submit">Try again</a>
-            <p class="auth-switch">Check your Wi-Fi or mobile data, then tap the button.</p>
+            {# an empty href reloads whatever page was being opened #}
+            <p class="auth-switch"><a href="">Try again</a></p>
         </div>
     </div>
 </body>

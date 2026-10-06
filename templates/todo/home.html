@@ -1,17 +1,17 @@
 {% extends "base.html" %}
 
-{% block title %}Hangarin | Home{% endblock %}
+{% block title %}Home | Hangarin{% endblock %}
 
 {% block content %}
 {% with today=summary.today %}
-<section class="hero">
+<section class="hero glass glass-tint">
     <div class="hero-text">
         <p class="hero-kicker">{% now "l, F j" %}</p>
         <h1>{{ greeting }}</h1>
         <p class="lead">{{ hero_line }}</p>
         <div class="hero-actions">
-            <a href="{% url 'task-list' %}" class="btn btn-primary">View my tasks</a>
-            <a href="{% url 'task-create' %}" class="btn btn-outline">Add a task</a>
+            <a href="{% url 'task-list' %}" class="btn btn-light">View my tasks</a>
+            <a href="{% url 'task-create' %}" class="btn btn-ghost">Add a task</a>
         </div>
     </div>
     <div class="hero-art">
@@ -31,34 +31,33 @@
 {% endwith %}
 
 <section class="quick-add-section">
-    <form method="post" action="{% url 'task-create' %}" class="quick-add-form">
+    <form method="post" action="{% url 'task-create' %}" class="quick-add-form glass">
         {% csrf_token %}
         <input type="hidden" name="status" value="Pending">
         <input type="hidden" name="next" value="{% url 'home' %}">
-        <span class="quick-add-icon">🌱</span>
+        <span class="quick-add-icon" aria-hidden="true">🌱</span>
         <input type="text" name="title" class="quick-add-input" maxlength="255"
-               placeholder="Quick-add a task, press enter to plant it…" required
-               aria-label="Task title">
+               placeholder="Quick-add a task, press Enter to plant it…" required aria-label="Task title">
         <button type="submit" class="btn btn-primary btn-small">Add</button>
     </form>
 </section>
 
 <section class="stats">
-    <div class="stat-card">
+    <div class="stat-card glass">
         <span class="stat-number" data-count="{{ summary.total }}">{{ summary.total }}</span>
         <span class="stat-label">Total tasks</span>
     </div>
-    <div class="stat-card">
+    <div class="stat-card glass">
         <span class="stat-number" data-count="{{ summary.open }}">{{ summary.open }}</span>
         <span class="stat-label">Still open</span>
     </div>
-    <div class="stat-card">
+    <div class="stat-card glass">
         <span class="stat-number" data-count="{{ summary.completed }}">{{ summary.completed }}</span>
         <span class="stat-label">Completed</span>
     </div>
-    <div class="stat-card stat-streak">
+    <div class="stat-card stat-streak glass">
         <span class="stat-number" data-count="{{ summary.streak }}">{{ summary.streak }}</span>
-        <span class="stat-label">Day streak {% if summary.streak %}🔥{% endif %}</span>
+        <span class="stat-label">Day streak{% if summary.streak %} <span class="emo-inline" aria-hidden="true">🔥</span>{% endif %}</span>
     </div>
 </section>
 
@@ -68,7 +67,7 @@
         {% if upcoming_tasks %}
         <div class="row-list">
             {% for task in upcoming_tasks %}
-            <a href="{% url 'task-detail' task.pk %}" class="row-item row-item-link">
+            <a href="{% url 'task-detail' task.pk %}" class="row-item row-item-link glass">
                 <span class="row-dot status-{{ task.status|slugify }}"></span>
                 <div class="row-main">
                     <span class="row-title">{{ task.title }}</span>
@@ -81,13 +80,13 @@
             {% endfor %}
         </div>
         {% else %}
-        <div class="mini-empty">
-            <p>Nothing with a deadline coming up. Add a date to a task and it will show here.</p>
+        <div class="mini-empty glass">
+            <p>Nothing with a deadline coming up. Give a task a date and it will show here.</p>
         </div>
         {% endif %}
     </section>
 
-    <aside class="level-card">
+    <aside class="level-card glass">
         <div class="level-head">
             <span class="level-badge">Lv {{ summary.level.level }}</span>
             <div>
@@ -104,29 +103,35 @@
 </div>
 
 <section class="quick-grid">
-    <a href="{% url 'task-list' %}" class="quick-card">
+    <a href="{% url 'task-list' %}" class="quick-card glass">
+        <svg class="i" aria-hidden="true"><use href="#i-tasks"></use></svg>
         <h3>Tasks</h3>
-        <p>Everything on your plate, sortable by deadline, category or priority.</p>
+        <p>Everything on your list, with search, filters and sorting.</p>
     </a>
-    <a href="{% url 'subtask-list' %}" class="quick-card">
+    <a href="{% url 'subtask-list' %}" class="quick-card glass">
+        <svg class="i" aria-hidden="true"><use href="#i-subtask"></use></svg>
         <h3>Subtasks</h3>
-        <p>Break the big stuff into steps you can actually knock out.</p>
+        <p>Smaller steps for the bigger jobs.</p>
     </a>
-    <a href="{% url 'note-list' %}" class="quick-card">
+    <a href="{% url 'note-list' %}" class="quick-card glass">
+        <svg class="i" aria-hidden="true"><use href="#i-note"></use></svg>
         <h3>Notes</h3>
-        <p>Context and reminders attached to the task they belong to.</p>
+        <p>Details and reminders kept with the task they belong to.</p>
     </a>
-    <a href="{% url 'category-list' %}" class="quick-card">
+    <a href="{% url 'category-list' %}" class="quick-card glass">
+        <svg class="i" aria-hidden="true"><use href="#i-folder"></use></svg>
         <h3>Categories</h3>
-        <p>Work, school, personal, or whatever else you need to keep apart.</p>
+        <p>Work, school, personal, or your own.</p>
     </a>
-    <a href="{% url 'priority-list' %}" class="quick-card">
+    <a href="{% url 'priority-list' %}" class="quick-card glass">
+        <svg class="i" aria-hidden="true"><use href="#i-flag"></use></svg>
         <h3>Priorities</h3>
-        <p>From critical to optional, so you know what to open first.</p>
+        <p>From critical to optional.</p>
     </a>
-    <a href="{% url 'profile' %}" class="quick-card">
+    <a href="{% url 'profile' %}" class="quick-card glass">
+        <svg class="i" aria-hidden="true"><use href="#i-chart"></use></svg>
         <h3>My progress</h3>
-        <p>Your streak, weekly chart, level and badges.</p>
+        <p>Streak, weekly chart, level and badges.</p>
     </a>
 </section>
 {% endblock %}

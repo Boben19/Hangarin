@@ -19,7 +19,6 @@ XP_PER_SUBTASK = 3
 XP_PER_NOTE = 1
 NOTE_XP_CAP = 30
 
-# the plant theme carries through to the level names
 LEVEL_TITLES = [
     "Seed", "Sprout", "Seedling", "Sapling", "Young tree",
     "Tall tree", "Grove keeper", "Forest guardian", "Ancient oak",
@@ -149,24 +148,33 @@ def _best_weekday(counter):
     return {"name": WEEKDAYS[index], "total": total}
 
 
+# Each badge keeps its icon name (a symbol in templates/_icons.html) and also
+# gets an emoji, which is what the profile page shows.
+BADGE_EMOJI = {
+    "leaf": "🌱", "check-circle": "✅", "flame": "🔥", "tree": "🌳", "steps": "🪜",
+    "note": "📝", "calendar-check": "📆", "trophy": "🏆", "target": "🎯", "clock-check": "🧹",
+}
+
+
 def _badges(numbers):
-    """(emoji, name, what-it-takes, current, needed) for each badge."""
+    """(icon, name, what-it-takes, current, needed) for each badge."""
     rows = [
-        ("🌱", "First seed", "Add your first task", numbers["total"], 1),
-        ("✅", "Finisher", "Complete a task", numbers["completed"], 1),
-        ("🔥", "On a roll", "Complete 10 tasks", numbers["completed"], 10),
-        ("🌳", "Green thumb", "Complete 50 tasks", numbers["completed"], 50),
-        ("🪜", "Step by step", "Finish 25 subtasks", numbers["subtasks_done"], 25),
-        ("📝", "Note taker", "Write 10 notes", numbers["notes"], 10),
-        ("📆", "Three in a row", "Get a 3-day streak", numbers["best_streak"], 3),
-        ("🏆", "A full week", "Get a 7-day streak", numbers["best_streak"], 7),
-        ("🎯", "Goal getter", "Hit your daily goal once", numbers["best_day"], numbers["goal"]),
-        ("🧹", "Nothing late", "Have 5+ tasks and none overdue",
+        ("leaf", "First seed", "Add your first task", numbers["total"], 1),
+        ("check-circle", "Finisher", "Complete a task", numbers["completed"], 1),
+        ("flame", "On a roll", "Complete 10 tasks", numbers["completed"], 10),
+        ("tree", "Green thumb", "Complete 50 tasks", numbers["completed"], 50),
+        ("steps", "Step by step", "Finish 25 subtasks", numbers["subtasks_done"], 25),
+        ("note", "Note taker", "Write 10 notes", numbers["notes"], 10),
+        ("calendar-check", "Three in a row", "Get a 3-day streak", numbers["best_streak"], 3),
+        ("trophy", "A full week", "Get a 7-day streak", numbers["best_streak"], 7),
+        ("target", "Goal getter", "Hit your daily goal once", numbers["best_day"], numbers["goal"]),
+        ("clock-check", "Nothing late", "Have 5+ tasks and none overdue",
          numbers["total"] if numbers["overdue"] == 0 else 0, 5),
     ]
     return [
         {
-            "emoji": emoji,
+            "icon": icon,
+            "emoji": BADGE_EMOJI.get(icon, "⭐"),
             "name": name,
             "hint": hint,
             "have": min(have, need),
@@ -174,7 +182,7 @@ def _badges(numbers):
             "earned": have >= need,
             "pct": min(100, round(have * 100 / need)) if need else 100,
         }
-        for emoji, name, hint, have, need in rows
+        for icon, name, hint, have, need in rows
     ]
 
 

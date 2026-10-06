@@ -2,14 +2,16 @@
 
 {% block title %}Sign-in didn't finish | Hangarin{% endblock %}
 
+{% block auth_back %}{% include "_back.html" with fallback=login_url %}{% endblock %}
+
 {% block auth_content %}
-<div class="auth-card">
+<div class="auth-card glass">
     <div class="auth-brand">
-        <span class="auth-mark">🥀</span>
-        <h1>That didn't go through</h1>
+        <span class="auth-mark" aria-hidden="true">🥀</span>
+        <h1>Sign-in didn't finish</h1>
         <p class="auth-sub">
-            The sign-in didn't finish. Usually that means it was cancelled on
-            the other site, or it took too long. Nothing on your account changed.
+            It was probably cancelled on the other site, or it took too long.
+            Nothing on your account changed.
         </p>
     </div>
     <a href="{% url 'account_login' %}" class="btn btn-primary auth-submit">Back to log in</a>

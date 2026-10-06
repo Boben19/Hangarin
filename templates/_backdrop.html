@@ -1,0 +1,23 @@
+{% comment %}
+The soft colour fields plus the little emoji that wiggle about behind the glass.
+They're decoration only (aria-hidden, no pointer events). Each one gets its own
+spot (--x/--y), size (--s), speed (--t) and head start (--d). static/js/app.js
+nudges them away from the cursor on devices that have one.
+{% endcomment %}
+<div class="backdrop" aria-hidden="true">
+    <span class="orb orb-a"></span><span class="orb orb-b"></span><span class="orb orb-c"></span>
+    <div class="emoji-field">
+        <span class="emo" style="--x:6%;--y:12%;--s:3rem;--t:9s;--d:-1s"><span>🌱</span></span>
+        <span class="emo" style="--x:86%;--y:9%;--s:3.4rem;--t:11s;--d:-4s"><span>🍃</span></span>
+        <span class="emo" style="--x:44%;--y:5%;--s:2.2rem;--t:8s;--d:-6s"><span>⭐</span></span>
+        <span class="emo" style="--x:92%;--y:44%;--s:2.6rem;--t:10s;--d:-2s"><span>🌼</span></span>
+        <span class="emo" style="--x:3%;--y:52%;--s:2.4rem;--t:12s;--d:-7s"><span>🍀</span></span>
+        <span class="emo" style="--x:21%;--y:84%;--s:3.2rem;--t:9.5s;--d:-3s"><span>🌿</span></span>
+        <span class="emo" style="--x:64%;--y:88%;--s:2.8rem;--t:10.5s;--d:-5s"><span>🎯</span></span>
+        <span class="emo" style="--x:90%;--y:82%;--s:3rem;--t:8.5s;--d:-8s"><span>🔥</span></span>
+        <span class="emo" style="--x:34%;--y:30%;--s:2rem;--t:13s;--d:-9s"><span>✅</span></span>
+        <span class="emo" style="--x:74%;--y:26%;--s:2.1rem;--t:11.5s;--d:-2.5s"><span>📝</span></span>
+        <span class="emo" style="--x:55%;--y:62%;--s:2.2rem;--t:12.5s;--d:-6.5s"><span>🌸</span></span>
+        <span class="emo" style="--x:12%;--y:30%;--s:2rem;--t:10s;--d:-10s"><span>🌻</span></span>
+    </div>
+</div>

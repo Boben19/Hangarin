@@ -2,31 +2,31 @@
 
 {% block title %}Log in | Hangarin{% endblock %}
 
-{% block auth_back_url %}{% url 'home' %}{% endblock %}
+{% block auth_back %}{% include "_back.html" with fallback=request.path optional=True %}{% endblock %}
+
 {% block auth_content %}
-<div class="auth-card">
+<div class="auth-card glass">
     <div class="auth-brand">
-        <span class="auth-mark">🌱</span>
+        <span class="auth-mark" aria-hidden="true">🌱</span>
         <h1>Welcome back</h1>
-        <p class="auth-sub">Pick up where your list left off.</p>
+        <p class="auth-sub">Log in to see your tasks.</p>
     </div>
 
     {% include "account/_social_buttons.html" %}
 
-
-    <form method="post" action="{% url 'account_login' %}" class="auth-form" novalidate>
+    <form method="post" action="{% url 'account_login' %}" class="auth-form" novalidate data-needs-online>
         {% csrf_token %}
         {% if form.non_field_errors %}
-        <div class="field-error field-error-block">{{ form.non_field_errors.0 }}</div>
+        <div class="form-alert" role="alert">
+            {% for error in form.non_field_errors %}<p>{{ error }}</p>{% endfor %}
+        </div>
         {% endif %}
+        <p class="form-alert form-offline-note" role="alert" hidden>
+            You're offline. You need a connection to log in.
+        </p>
 
-        <label class="auth-label" for="{{ form.login.id_for_label }}">Username or email</label>
-        {{ form.login }}
-        {% if form.login.errors %}<p class="field-error">{{ form.login.errors.0 }}</p>{% endif %}
-
-        <label class="auth-label" for="{{ form.password.id_for_label }}">Password</label>
-        {{ form.password }}
-        {% if form.password.errors %}<p class="field-error">{{ form.password.errors.0 }}</p>{% endif %}
+        {% include "account/_field.html" with field=form.login label="Username or email" %}
+        {% include "account/_field.html" with field=form.password password=True %}
 
         <div class="auth-row">
             <label class="auth-check">{{ form.remember }} <span>Keep me logged in</span></label>
@@ -39,6 +39,6 @@
         <button type="submit" class="btn btn-primary auth-submit">Log in</button>
     </form>
 
-    <p class="auth-switch">New here? <a href="{% url 'account_signup' %}">Create an account</a></p>
+    <p class="auth-switch">New here? <a href="{% url 'account_signup' %}{% if redirect_field_value %}?{{ redirect_field_name }}={{ redirect_field_value|urlencode }}{% endif %}">Create an account</a></p>
 </div>
 {% endblock %}

@@ -9,7 +9,7 @@
         {% include "todo/_avatar.html" with p=profile size="xl" %}
         <div class="profile-id-text">
             <h1>{{ profile.display_name }}</h1>
-            <p class="profile-handle">@{{ user_obj.get_username }} &middot; growing since {{ user_obj.date_joined|date:"F Y" }}</p>
+            <p class="profile-handle">@{{ user_obj.get_username }} &middot; member since {{ user_obj.date_joined|date:"F Y" }}</p>
             {% if profile.bio %}<p class="profile-bio">{{ profile.bio }}</p>{% endif %}
         </div>
     </div>
@@ -19,7 +19,7 @@
 </section>
 {% endwith %}
 
-<section class="level-strip" data-glow>
+<section class="level-strip glass" data-glow>
     <div class="level-strip-main">
         <span class="level-badge level-badge-lg">Lv {{ summary.level.level }}</span>
         <div class="level-strip-text">
@@ -34,17 +34,17 @@
 </section>
 
 <section class="stats profile-stats">
-    <div class="stat-card">
+    <div class="stat-card glass">
         <span class="stat-number"><span data-count="{{ summary.completion_rate }}">{{ summary.completion_rate }}</span>%</span>
         <span class="stat-label">Completion rate</span>
         <span class="stat-foot">{{ summary.completed }} of {{ summary.total }} tasks</span>
     </div>
-    <div class="stat-card stat-streak">
+    <div class="stat-card glass stat-streak">
         <span class="stat-number" data-count="{{ summary.streak }}">{{ summary.streak }}</span>
-        <span class="stat-label">Day streak {% if summary.streak %}🔥{% endif %}</span>
+        <span class="stat-label">Day streak{% if summary.streak %} <span class="emo-inline" aria-hidden="true">🔥</span>{% endif %}</span>
         <span class="stat-foot">Best: {{ summary.best_streak }} day{{ summary.best_streak|pluralize }}</span>
     </div>
-    <div class="stat-card">
+    <div class="stat-card glass">
         <span class="stat-number" data-count="{{ summary.this_week }}">{{ summary.this_week }}</span>
         <span class="stat-label">Done in the last 7 days</span>
         <span class="stat-foot">
@@ -53,17 +53,17 @@
             {% else %}Same as the week before{% endif %}
         </span>
     </div>
-    <div class="stat-card {% if summary.overdue %}stat-warn{% endif %}">
+    <div class="stat-card glass {% if summary.overdue %}stat-warn{% endif %}">
         <span class="stat-number" data-count="{{ summary.overdue }}">{{ summary.overdue }}</span>
         <span class="stat-label">Overdue</span>
         <span class="stat-foot">
-            {% if summary.overdue %}<a href="{% url 'task-list' %}?due=overdue">Take a look</a>{% else %}Nothing running late{% endif %}
+            {% if summary.overdue %}<a href="{% url 'task-list' %}?due=overdue">View them</a>{% else %}Nothing overdue{% endif %}
         </span>
     </div>
 </section>
 
 <div class="profile-grid">
-    <section class="panel" data-glow>
+    <section class="panel glass" data-glow>
         <div class="panel-head">
             <h2>Last 7 days</h2>
             <span class="panel-sub">tasks and subtasks finished</span>
@@ -81,7 +81,7 @@
         </div>
     </section>
 
-    <section class="panel" data-glow>
+    <section class="panel glass" data-glow>
         <div class="panel-head">
             <h2>Today</h2>
             <span class="panel-sub">daily goal: {{ summary.today.goal }}</span>
@@ -98,9 +98,9 @@
                 </div>
             </div>
             <p class="today-text">
-                {% if summary.today.hit %}Goal reached. Anything else today is a bonus.
+                {% if summary.today.hit %}Goal reached.
                 {% elif summary.today.done %}{{ summary.today.left }} more and you've hit today's goal.
-                {% else %}Nothing finished yet today. One small step counts.{% endif %}
+                {% else %}Nothing finished yet today.{% endif %}
             </p>
             <a href="{% url 'profile-edit' %}" class="text-link">Change my goal</a>
         </div>
@@ -108,10 +108,10 @@
 </div>
 
 <div class="profile-grid">
-    <section class="panel" data-glow>
+    <section class="panel glass" data-glow>
         <div class="panel-head">
-            <h2>Where your tasks live</h2>
-            <span class="panel-sub">by category</span>
+            <h2>Tasks by category</h2>
+            <span class="panel-sub">done out of total</span>
         </div>
         {% if summary.breakdown %}
         <ul class="breakdown">
@@ -119,18 +119,18 @@
             <li>
                 <div class="breakdown-top">
                     <span>{{ row.name }}</span>
-                    <span class="breakdown-num">{{ row.done }}/{{ row.n }} done</span>
+                    <span class="breakdown-num">{{ row.n }} task{{ row.n|pluralize }}, {{ row.done }} done</span>
                 </div>
                 <div class="bar bar-thin"><span class="bar-fill" style="--p: {{ row.pct }}%"></span></div>
             </li>
             {% endfor %}
         </ul>
         {% else %}
-        <p class="detail-empty">Add a few tasks and this fills in.</p>
+        <p class="detail-empty">Add some tasks and this fills in.</p>
         {% endif %}
     </section>
 
-    <section class="panel" data-glow>
+    <section class="panel glass" data-glow>
         <div class="panel-head">
             <h2>Recent wins</h2>
             <span class="panel-sub">latest things you finished</span>
@@ -139,7 +139,7 @@
         <ul class="wins">
             {% for item in summary.recent %}
             <li>
-                <span class="win-mark">{% if item.kind == "task" %}✓{% else %}↳{% endif %}</span>
+                <span class="win-mark"><svg class="i" aria-hidden="true"><use href="#i-{% if item.kind == "task" %}check{% else %}subtask{% endif %}"></use></svg></span>
                 <a href="{% url 'task-detail' item.pk %}" class="win-title">{{ item.title }}</a>
                 <span class="win-when">{{ item.when|date:"M j" }}</span>
             </li>
@@ -151,7 +151,7 @@
     </section>
 </div>
 
-<section class="panel panel-wide" data-glow>
+<section class="panel glass panel-wide" data-glow>
     <div class="panel-head">
         <h2>Your last 12 weeks</h2>
         <span class="panel-sub">{{ summary.active_days }} active day{{ summary.active_days|pluralize }}</span>
@@ -177,7 +177,7 @@
     </div>
 </section>
 
-<section class="panel panel-wide">
+<section class="panel glass panel-wide">
     <div class="panel-head">
         <h2>Badges</h2>
         <span class="panel-sub">{{ summary.badges_earned }} of {{ summary.badges|length }} earned</span>
@@ -185,7 +185,7 @@
     <div class="badge-grid">
         {% for b in summary.badges %}
         <div class="award{% if b.earned %} is-earned{% endif %}" title="{{ b.hint }}">
-            <span class="award-emoji" aria-hidden="true">{{ b.emoji }}</span>
+            <span class="award-icon" aria-hidden="true">{{ b.emoji }}</span>
             <span class="award-name">{{ b.name }}</span>
             <span class="award-hint">{{ b.hint }}</span>
             {% if b.earned %}
@@ -199,7 +199,7 @@
     </div>
 </section>
 
-<section class="panel panel-wide account-panel">
+<section class="panel glass panel-wide account-panel">
     <div class="panel-head">
         <h2>Account</h2>
     </div>

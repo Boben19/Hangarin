@@ -2,23 +2,25 @@
 
 {% block title %}{{ form_title }} | Hangarin{% endblock %}
 
+{% block back %}{% include "_back.html" with fallback=cancel_url %}{% endblock %}
+
 {% block content %}
 <div class="form-page">
-    <div class="form-card">
+    <div class="form-card glass">
         <div class="form-card-head">
-            <a href="{{ cancel_url }}" class="form-back" data-history-back><span aria-hidden="true">←</span> Back</a>
             <div>
                 <h1>{{ form_title }}</h1>
                 {% if form_hint %}<p class="page-sub">{{ form_hint }}</p>{% endif %}
             </div>
-            <a href="{{ cancel_url }}" class="form-close" aria-label="Close">&times;</a>
+            <a href="{{ cancel_url }}" class="form-close" aria-label="Close"><svg class="i" aria-hidden="true"><use href="#i-x"></use></svg></a>
         </div>
 
-        <form method="post" class="stack-form" novalidate data-draft-key="hangarin-draft-{{ request.user.pk }}-{{ request.resolver_match.url_name }}{% if object.pk %}-{{ object.pk }}{% endif %}">
+        <form method="post" class="stack-form" novalidate
+              data-draft-key="hangarin-draft-{{ request.user.pk }}-{{ request.resolver_match.url_name }}{% if object.pk %}-{{ object.pk }}{% endif %}">
             {% csrf_token %}
 
             {% if form.non_field_errors %}
-                <div class="field-error field-error-block">{{ form.non_field_errors }}</div>
+                <div class="form-alert" role="alert">{{ form.non_field_errors }}</div>
             {% endif %}
 
             {% for field in form %}
@@ -27,7 +29,7 @@
                 {% else %}
                 <div class="field{% if field.errors %} has-error{% endif %}">
                     <label for="{{ field.id_for_label }}">
-                        {{ field.label }}{% if field.field.required %}<span class="req">*</span>{% endif %}
+                        {{ field.label }}{% if field.field.required %}<span class="req" title="Required">*</span>{% endif %}
                     </label>
                     {{ field }}
                     {% if field.help_text %}<p class="field-help">{{ field.help_text }}</p>{% endif %}

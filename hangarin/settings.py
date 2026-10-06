@@ -282,15 +282,19 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # background (#eefaf3) in style.css.
 
 PWA_APP_NAME = 'Hangarin'
-PWA_APP_DESCRIPTION = 'Tasks, subtasks and notes, with streaks and levels to keep you going.'
+PWA_APP_DESCRIPTION = 'Tasks, subtasks and notes. Works offline and syncs when you reconnect.'
 PWA_APP_THEME_COLOR = '#14342a'
-PWA_APP_BACKGROUND_COLOR = '#eefaf3'
+PWA_APP_BACKGROUND_COLOR = '#e6f2ec'
 PWA_APP_DISPLAY = 'standalone'
 PWA_APP_SCOPE = '/'
 # 'any' instead of 'portrait' because the layout has a sidebar and people
 # will open it on tablets and laptops too.
 PWA_APP_ORIENTATION = 'any'
 PWA_APP_START_URL = '/'
+PWA_APP_SHORTCUTS = [
+    {'name': 'New task', 'url': '/tasks/new/', 'description': 'Add a task'},
+    {'name': 'My tasks', 'url': '/tasks/', 'description': 'See everything on your list'},
+]
 PWA_APP_STATUS_BAR_COLOR = 'default'
 PWA_APP_ICONS = [
     {'src': STATIC_URL + 'img/icon-192.png', 'sizes': '192x192'},

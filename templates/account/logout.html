@@ -2,22 +2,23 @@
 
 {% block title %}Log out | Hangarin{% endblock %}
 
-{% block auth_back_url %}{% url 'account_login' %}{% endblock %}
+{% block auth_back %}{% include "_back.html" with fallback=back_url %}{% endblock %}
+
 {% block auth_content %}
-<div class="auth-card">
+<div class="auth-card glass">
     <div class="auth-brand">
-        <span class="auth-mark">👋</span>
-        <h1>Leaving already?</h1>
+        <span class="auth-mark" aria-hidden="true">👋</span>
+        <h1>Log out?</h1>
         <p class="auth-sub">You'll need to log in again to see your tasks.</p>
     </div>
 
-    <form method="post" action="{% url 'account_logout' %}" class="auth-form">
+    <form method="post" action="{% url 'account_logout' %}" class="auth-form" data-logout>
         {% csrf_token %}
         {% if redirect_field_value %}
         <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}">
         {% endif %}
-        <button type="submit" class="btn btn-primary auth-submit">Log me out</button>
+        <button type="submit" class="btn btn-primary auth-submit">Log out</button>
     </form>
-    <p class="auth-switch"><a href="{% url 'home' %}">Actually, take me back</a></p>
+    <p class="auth-switch"><a href="{% url 'home' %}">Stay logged in</a></p>
 </div>
 {% endblock %}

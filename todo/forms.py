@@ -41,7 +41,7 @@ class TaskForm(UserScopedForm):
             }),
             "description": forms.Textarea(attrs={
                 "class": TEXTAREA, "rows": 4,
-                "placeholder": "Any extra detail worth remembering…",
+                "placeholder": "Details (optional)",
             }),
             "deadline": forms.DateTimeInput(
                 attrs={"class": INPUT, "type": "datetime-local"},
@@ -91,7 +91,7 @@ class NoteForm(UserScopedForm):
             "task": forms.Select(attrs={"class": INPUT}),
             "content": forms.Textarea(attrs={
                 "class": TEXTAREA, "rows": 5,
-                "placeholder": "Write it down before you forget…", "autofocus": True,
+                "placeholder": "Write your note here", "autofocus": True,
             }),
         }
         labels = {"task": "Attached to"}

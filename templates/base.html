@@ -4,66 +4,72 @@
 <html lang="en" data-theme="{{ my_profile.theme|default:'system' }}">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token }}">
+    <meta name="hangarin-uid" content="{{ offline_uid }}">
     <meta name="color-scheme" content="light dark">
     <title>{% block title %}Hangarin{% endblock %}</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8C%B1%3C/text%3E%3C/svg%3E">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     {% progressive_web_app_meta %}
     {% block extra_head %}{% endblock %}
 </head>
 <body class="{% block body_class %}{% endblock %}">
+    {% include "_icons.html" %}
     <a href="#main" class="skip-link">Skip to content</a>
+
+    {% include "_backdrop.html" %}
 
     <input type="checkbox" id="nav-toggle" class="nav-toggle-check">
 
-    <header class="topbar">
-        <label for="nav-toggle" class="hamburger" aria-label="Open menu">
-            <span></span><span></span><span></span>
+    <header class="topbar glass">
+        <label for="nav-toggle" class="hamburger" aria-label="Open menu" role="button">
+            <svg class="i" aria-hidden="true"><use href="#i-menu"></use></svg>
         </label>
         <a href="{% url 'home' %}" class="brand">
-            <span class="brand-mark">🌱</span> Hangarin
+            <span class="brand-mark" aria-hidden="true">🌱</span>
+            <span>Hangarin</span>
         </a>
-        <button type="button" class="theme-toggle theme-toggle-top" data-theme-toggle data-theme-url="{% url 'set-theme' %}" aria-label="Switch between light and dark">
-            <span class="theme-ico" aria-hidden="true"></span>
+        <button type="button" class="icon-btn" data-theme-toggle data-theme-url="{% url 'set-theme' %}" aria-label="Switch between light and dark">
+            <svg class="i i-moon" aria-hidden="true"><use href="#i-moon"></use></svg>
+            <svg class="i i-sun" aria-hidden="true"><use href="#i-sun"></use></svg>
         </button>
     </header>
+    <label for="nav-toggle" class="nav-scrim" aria-hidden="true"></label>
 
     <div class="app-shell">
-        <nav class="sidebar" aria-label="Main">
+        <nav class="sidebar glass" aria-label="Main">
             <a href="{% url 'home' %}" class="side-brand">
-                <span class="brand-mark">🌱</span>
+                <span class="brand-mark" aria-hidden="true">🌱</span>
                 <span>Hangarin</span>
             </a>
             <p class="side-tag">grow your to-do list</p>
 
-            <a href="{% url 'task-create' %}" class="btn btn-primary btn-small side-new-btn" data-new-task>+ New task</a>
+            <a href="{% url 'task-create' %}" class="btn btn-primary side-new-btn" data-new-task>
+                <svg class="i" aria-hidden="true"><use href="#i-plus"></use></svg> New task
+            </a>
 
             <div class="side-links">
-                <a href="{% url 'home' %}" class="side-link {% if nav == 'home' %}is-active{% endif %}">
-                    <span class="side-ico">⌂</span> Home
+                <a href="{% url 'home' %}" class="side-link {% if nav == 'home' %}is-active{% endif %}" {% if nav == 'home' %}aria-current="page"{% endif %}>
+                    <svg class="i" aria-hidden="true"><use href="#i-home"></use></svg> Home
                 </a>
-                <a href="{% url 'task-list' %}" class="side-link {% if nav == 'task' %}is-active{% endif %}">
-                    <span class="side-ico">✓</span> Tasks
+                <a href="{% url 'task-list' %}" class="side-link {% if nav == 'task' %}is-active{% endif %}" {% if nav == 'task' %}aria-current="page"{% endif %}>
+                    <svg class="i" aria-hidden="true"><use href="#i-tasks"></use></svg> Tasks
                 </a>
-                <a href="{% url 'subtask-list' %}" class="side-link {% if nav == 'subtask' %}is-active{% endif %}">
-                    <span class="side-ico">↳</span> Subtasks
+                <a href="{% url 'subtask-list' %}" class="side-link {% if nav == 'subtask' %}is-active{% endif %}" {% if nav == 'subtask' %}aria-current="page"{% endif %}>
+                    <svg class="i" aria-hidden="true"><use href="#i-subtask"></use></svg> Subtasks
                 </a>
-                <a href="{% url 'note-list' %}" class="side-link {% if nav == 'note' %}is-active{% endif %}">
-                    <span class="side-ico">✎</span> Notes
+                <a href="{% url 'note-list' %}" class="side-link {% if nav == 'note' %}is-active{% endif %}" {% if nav == 'note' %}aria-current="page"{% endif %}>
+                    <svg class="i" aria-hidden="true"><use href="#i-note"></use></svg> Notes
                 </a>
-                <a href="{% url 'category-list' %}" class="side-link {% if nav == 'category' %}is-active{% endif %}">
-                    <span class="side-ico">▤</span> Categories
+                <a href="{% url 'category-list' %}" class="side-link {% if nav == 'category' %}is-active{% endif %}" {% if nav == 'category' %}aria-current="page"{% endif %}>
+                    <svg class="i" aria-hidden="true"><use href="#i-folder"></use></svg> Categories
                 </a>
-                <a href="{% url 'priority-list' %}" class="side-link {% if nav == 'priority' %}is-active{% endif %}">
-                    <span class="side-ico">◆</span> Priorities
+                <a href="{% url 'priority-list' %}" class="side-link {% if nav == 'priority' %}is-active{% endif %}" {% if nav == 'priority' %}aria-current="page"{% endif %}>
+                    <svg class="i" aria-hidden="true"><use href="#i-flag"></use></svg> Priorities
                 </a>
-                <a href="{% url 'profile' %}" class="side-link {% if nav == 'profile' %}is-active{% endif %}">
-                    <span class="side-ico">☺</span> My progress
+                <a href="{% url 'profile' %}" class="side-link {% if nav == 'profile' %}is-active{% endif %}" {% if nav == 'profile' %}aria-current="page"{% endif %}>
+                    <svg class="i" aria-hidden="true"><use href="#i-chart"></use></svg> My progress
                 </a>
             </div>
 
@@ -76,23 +82,31 @@
                     </span>
                 </a>
                 <div class="side-actions">
-                    <button type="button" class="theme-toggle" data-theme-toggle data-theme-url="{% url 'set-theme' %}" aria-label="Switch between light and dark">
-                        <span class="theme-ico" aria-hidden="true"></span>
-                        <span class="theme-label">Theme</span>
+                    <button type="button" class="chip-btn" data-theme-toggle data-theme-url="{% url 'set-theme' %}" aria-label="Switch between light and dark">
+                        <svg class="i i-moon" aria-hidden="true"><use href="#i-moon"></use></svg>
+                        <svg class="i i-sun" aria-hidden="true"><use href="#i-sun"></use></svg>
+                        <span>Theme</span>
                     </button>
-                    <form method="post" action="{% url 'account_logout' %}" class="logout-form" data-logout-form>
+                    <form method="post" action="{% url 'account_logout' %}" class="logout-form" data-logout>
                         {% csrf_token %}
-                        <button type="submit" class="side-logout">Log out</button>
+                        <button type="submit" class="chip-btn">
+                            <svg class="i" aria-hidden="true"><use href="#i-logout"></use></svg>
+                            <span>Log out</span>
+                        </button>
                     </form>
                 </div>
-                <button type="button" class="side-install" data-install hidden>Install Hangarin</button>
+                <button type="button" class="side-install" data-install hidden>
+                    <svg class="i" aria-hidden="true"><use href="#i-download"></use></svg> Install Hangarin
+                </button>
                 {% if user.is_staff %}
-                <a href="/{{ ADMIN_URL|default:'admin/' }}" class="side-admin">Manage in admin →</a>
+                <a href="/{{ ADMIN_URL|default:'admin/' }}" class="side-admin">Admin site</a>
                 {% endif %}
-                <p class="side-hint"><kbd>N</kbd> new task &nbsp;<kbd>/</kbd> search</p>
+                <p class="side-hint"><kbd>N</kbd> new task &nbsp;<kbd>/</kbd> search &nbsp;<kbd>?</kbd> help</p>
             </div>
         </nav>
 
+        <div class="main-col">
+        {% block back %}{% if nav != 'home' %}{% include "_back.html" with fallback=back_url %}{% endif %}{% endblock %}
         <main class="content" id="main" tabindex="-1">
             {% if messages %}
             <div class="toast-stack" id="toast-stack" role="status">
@@ -106,6 +120,7 @@
             {% endif %}
             {% block content %}{% endblock %}
         </main>
+        </div>
     </div>
 
     <footer class="site-footer">
@@ -113,6 +128,8 @@
     </footer>
 
     <script src="{% static 'js/app.js' %}" defer></script>
+    <script src="{% static 'js/offline-store.js' %}" defer></script>
+    <script src="{% static 'js/offline.js' %}" defer></script>
     <script src="{% static 'js/pwa.js' %}" defer></script>
     {% block extra_js %}{% endblock %}
 </body>

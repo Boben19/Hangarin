@@ -3,16 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
     <title>Page not found | Hangarin</title>
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8C%B1%3C/text%3E%3C/svg%3E">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body class="auth-body">
+    {% include "_icons.html" %}
+    {% include "_backdrop.html" %}
     <div class="auth-page">
-        <div class="auth-card error-card">
+        <div class="auth-card glass error-card">
+            <span class="auth-mark" aria-hidden="true">🔍</span>
             <p class="error-code">404</p>
-            <h1>That page wandered off</h1>
-            <p class="error-text">The link may be old, or the task it pointed to was deleted. Head back home and try again.</p>
+            <h1>Page not found</h1>
+            <p class="error-text">The link may be old, or the task it pointed to was deleted.</p>
             <a href="/" class="btn btn-primary">Back to Hangarin</a>
         </div>
     </div>

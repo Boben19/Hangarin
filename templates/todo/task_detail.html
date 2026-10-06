@@ -2,14 +2,16 @@
 
 {% block title %}{{ task.title }} | Hangarin{% endblock %}
 
-{% block content %}
-<a href="{% url 'task-list' %}" class="back-link">&larr; All tasks</a>
+{% block back %}{% url 'task-list' as list_url %}{% include "_back.html" with fallback=list_url label="Tasks" %}{% endblock %}
 
-<div class="detail-head status-{{ task.status|slugify }}{% if task.is_overdue %} is-overdue{% endif %}">
+{% block content %}
+
+<div class="detail-head glass status-{{ task.status|slugify }}{% if task.is_overdue %} is-overdue{% endif %}">
     <div class="detail-head-top">
         <button type="button"
                 class="status-toggle badge badge-{{ task.status|slugify }}"
                 data-toggle-url="{% url 'task-toggle-status' task.pk %}"
+                data-label="{{ task.title }}"
                 title="Click to move this task to the next status">
             {{ task.status }}
         </button>
@@ -26,11 +28,11 @@
 
     <div class="detail-meta-row">
         {% if task.deadline %}
-            <span class="task-deadline{% if task.is_overdue %} is-late{% endif %}">📅 Due {{ task.deadline|date:"M j, Y, g:i A" }}</span>
+            <span class="task-deadline{% if task.is_overdue %} is-late{% endif %}"><span class="emo-inline" aria-hidden="true">📅</span> Due {{ task.deadline|date:"M j, Y, g:i A" }}</span>
         {% endif %}
-        <span class="task-deadline">🕐 Added {{ task.created_at|date:"M j, Y" }}</span>
+        <span class="task-deadline"><span class="emo-inline" aria-hidden="true">🕐</span> Added {{ task.created_at|date:"M j, Y" }}</span>
         {% if task.completed_at %}
-            <span class="task-deadline">✅ Finished {{ task.completed_at|date:"M j, Y" }}</span>
+            <span class="task-deadline"><span class="emo-inline" aria-hidden="true">✅</span> Finished {{ task.completed_at|date:"M j, Y" }}</span>
         {% endif %}
     </div>
 
@@ -41,7 +43,7 @@
 </div>
 
 <div class="detail-columns">
-    <section class="detail-col">
+    <section class="detail-col glass">
         <div class="detail-col-head">
             <h2>Subtasks</h2>
             <span class="detail-col-count" data-progress-for="{{ task.pk }}">
@@ -59,7 +61,7 @@
             {% csrf_token %}
             {{ subtask_form.parent_task }}
             {{ subtask_form.status }}
-            <input type="text" name="title" placeholder="Add a subtask and press enter…" class="field-input" maxlength="255" required aria-label="New subtask">
+            <input type="text" name="title" placeholder="Add a subtask and press Enter" class="field-input" maxlength="255" required aria-label="New subtask">
             <button type="submit" class="btn btn-primary btn-small">Add</button>
         </form>
 
@@ -71,25 +73,26 @@
                         class="subtask-check status-toggle status-{{ subtask.status|slugify }}"
                         data-toggle-url="{% url 'subtask-toggle-status' subtask.pk %}"
                         data-parent="{{ task.pk }}"
+                        data-label="{{ subtask.title }}"
                         aria-label="Change status of {{ subtask.title }}"
                         title="Click to move to the next status">
-                    {% if subtask.status == "Completed" %}✓{% endif %}
+                    {% if subtask.status == "Completed" %}<svg class="i" aria-hidden="true"><use href="#i-check"></use></svg>{% endif %}
                 </button>
                 <span class="subtask-title">{{ subtask.title }}</span>
                 <span class="badge badge-{{ subtask.status|slugify }} subtask-badge">{{ subtask.status }}</span>
                 <span class="row-actions">
-                    <a href="{% url 'subtask-update' subtask.pk %}" title="Edit" aria-label="Edit {{ subtask.title }}">✎</a>
-                    <a href="{% url 'subtask-delete' subtask.pk %}" title="Delete" aria-label="Delete {{ subtask.title }}">🗑</a>
+                    <a href="{% url 'subtask-update' subtask.pk %}" title="Edit" aria-label="Edit {{ subtask.title }}"><svg class="i" aria-hidden="true"><use href="#i-edit"></use></svg></a>
+                    <a href="{% url 'subtask-delete' subtask.pk %}" title="Delete" aria-label="Delete {{ subtask.title }}"><svg class="i" aria-hidden="true"><use href="#i-trash"></use></svg></a>
                 </span>
             </li>
             {% endfor %}
         </ul>
         {% else %}
-        <p class="detail-empty">No subtasks yet. Break this down into smaller steps above.</p>
+        <p class="detail-empty">No subtasks yet. Add one above to break this down.</p>
         {% endif %}
     </section>
 
-    <section class="detail-col">
+    <section class="detail-col glass">
         <div class="detail-col-head">
             <h2>Notes</h2>
             <span class="detail-col-count">{{ notes|length }}</span>
@@ -98,7 +101,7 @@
         <form method="post" action="{% url 'note-create' %}?task={{ task.pk }}" class="inline-add-form inline-add-form-stack">
             {% csrf_token %}
             {{ note_form.task }}
-            <textarea name="content" rows="2" placeholder="Jot something down…" class="field-input field-textarea" required aria-label="New note"></textarea>
+            <textarea name="content" rows="2" placeholder="Add a note" class="field-input field-textarea" required aria-label="New note"></textarea>
             <button type="submit" class="btn btn-primary btn-small">Add note</button>
         </form>
 
@@ -110,15 +113,15 @@
                 <div class="note-row-foot">
                     <span class="note-date">{{ note.created_at|date:"M j, Y, g:i A" }}</span>
                     <span class="row-actions">
-                        <a href="{% url 'note-update' note.pk %}" title="Edit" aria-label="Edit note">✎</a>
-                        <a href="{% url 'note-delete' note.pk %}" title="Delete" aria-label="Delete note">🗑</a>
+                        <a href="{% url 'note-update' note.pk %}" title="Edit" aria-label="Edit note"><svg class="i" aria-hidden="true"><use href="#i-edit"></use></svg></a>
+                        <a href="{% url 'note-delete' note.pk %}" title="Delete" aria-label="Delete note"><svg class="i" aria-hidden="true"><use href="#i-trash"></use></svg></a>
                     </span>
                 </div>
             </li>
             {% endfor %}
         </ul>
         {% else %}
-        <p class="detail-empty">Nothing written down yet.</p>
+        <p class="detail-empty">No notes yet.</p>
         {% endif %}
     </section>
 </div>

@@ -6,11 +6,11 @@
 <div class="page-head">
     <div>
         <h1>Tasks</h1>
-        <p class="page-sub">{{ paginator.count }} task{{ paginator.count|pluralize }}{% if is_filtered %} match{{ paginator.count|pluralize:"es," }} your filters{% else %} on the list{% endif %}.</p>
+        <p class="page-sub">{{ paginator.count }} task{{ paginator.count|pluralize }}{% if is_filtered %} match{{ paginator.count|pluralize:"es," }} your filters{% else %} in total{% endif %}.</p>
     </div>
     <div class="page-head-actions">
-        <a href="{% url 'task-export' %}{% querystring page=None %}" class="btn btn-outline-green btn-small">Export CSV</a>
-        <a href="{% url 'task-create' %}" class="btn btn-primary btn-small">+ New task</a>
+        <a href="{% url 'task-export' %}{% querystring page=None %}" class="btn btn-outline-green btn-small"><svg class="i" aria-hidden="true"><use href="#i-download"></use></svg> Export CSV</a>
+        <a href="{% url 'task-create' %}" class="btn btn-primary btn-small"><svg class="i" aria-hidden="true"><use href="#i-plus"></use></svg> New task</a>
     </div>
 </div>
 
@@ -24,10 +24,10 @@
     <a href="{% querystring status=None due='week' page=None %}" class="filter-chip {% if due == 'week' %}is-on{% endif %}">Next 7 days</a>
 </nav>
 
-<form class="toolbar" method="get">
+<form class="toolbar glass" method="get">
     {% if status %}<input type="hidden" name="status" value="{{ status }}">{% endif %}
     {% if due %}<input type="hidden" name="due" value="{{ due }}">{% endif %}
-    <input type="search" name="q" value="{{ query }}" placeholder="Search title or description…" class="toolbar-search" aria-label="Search tasks" data-search>
+    <input type="search" name="q" value="{{ query }}" placeholder="Search title or description" class="toolbar-search" aria-label="Search tasks" data-search>
     <select name="category" class="toolbar-sort" data-autosubmit aria-label="Category">
         <option value="">All categories</option>
         {% for c in categories %}<option value="{{ c.pk }}" {% if category_id == c.pk %}selected{% endif %}>{{ c.name }}</option>{% endfor %}
@@ -45,7 +45,7 @@
         <option value="-title" {% if sort_by == "-title" %}selected{% endif %}>Title (Z–A)</option>
         <option value="category" {% if sort_by == "category" %}selected{% endif %}>Category</option>
     </select>
-    <button type="submit" class="btn btn-outline-green btn-small">Search</button>
+    <button type="submit" class="btn btn-outline-green btn-small"><svg class="i" aria-hidden="true"><use href="#i-search"></use></svg> Search</button>
     {% if is_filtered %}<a href="{% url 'task-list' %}" class="toolbar-clear">Clear all</a>{% endif %}
 </form>
 
@@ -56,15 +56,15 @@
     {% endfor %}
 </div>
 {% else %}
-<div class="empty-state">
-    <span class="empty-leaf">🌱</span>
+<div class="empty-state glass">
+    <span class="empty-leaf" aria-hidden="true">🌱</span>
     {% if is_filtered %}
         <h3>Nothing matches</h3>
         <p>Try loosening a filter, or <a href="{% url 'task-list' %}">clear them all</a>.</p>
     {% else %}
-        <h3>Nothing here yet</h3>
-        <p>Add your first task and it will show up here.</p>
-        <a href="{% url 'task-create' %}" class="btn btn-primary btn-small empty-cta">+ New task</a>
+        <h3>No tasks yet</h3>
+        <p>Add your first task to get started.</p>
+        <a href="{% url 'task-create' %}" class="btn btn-primary btn-small empty-cta"><svg class="i" aria-hidden="true"><use href="#i-plus"></use></svg> New task</a>
     {% endif %}
 </div>
 {% endif %}
